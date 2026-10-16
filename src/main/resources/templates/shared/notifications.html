@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.notifications}, ${section}, ~{::section})}">
 <body>
 <section>
-  <div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="page-head">
     <h1 class="h4 m-0" th:text="#{nav.notifications}">Notifications</h1>
     <form method="post" th:action="@{/notifications/read}" data-multi>
       <button class="btn btn-outline-secondary btn-sm" type="submit" th:text="#{notif.markread}">Mark all read</button></form>

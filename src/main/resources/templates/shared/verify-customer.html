@@ -17,15 +17,15 @@
   <form th:if="${info.status != null}" method="post" th:action="@{/{a}/verify/redeem(a=${area})}">
     <input type="hidden" name="key" th:value="${key}">
     <h2 class="h6" th:text="#{redeem.choose}">Choose the meal to serve</h2>
-    <div class="d-grid gap-2">
+    <div class="slot-grid">
       <button th:each="s : ${slots}" class="btn btn-brand slot-btn" type="submit" name="slotId" th:value="${s.id}"
               th:disabled="${servedSlotIds.contains(s.id)}">
         <span th:text="${s.name}">Lunch</span>
         <small th:if="${servedSlotIds.contains(s.id)}" th:text="'· ' + #{redeem.served}">served</small>
       </button>
     </div>
+    <div class="form-actions"><a class="btn btn-outline-secondary" th:href="@{/{a}/verify(a=${area})}"><i class="bi bi-x-lg"></i><span th:text="#{action.cancel}">Cancel</span></a></div>
   </form>
-  <a class="btn btn-link mt-3" th:href="@{/{a}/verify(a=${area})}" th:text="#{action.cancel}">Cancel</a>
 </section>
 </body>
 </html>

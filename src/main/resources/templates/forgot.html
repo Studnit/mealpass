@@ -12,7 +12,7 @@
         <input type="email" id="email" name="email" class="form-control" required autofocus autocomplete="username" maxlength="190"></div>
       <button type="submit" class="btn btn-brand w-100" th:text="#{forgot.submit}">Send link</button>
     </form>
-    <p class="text-center mt-3 mb-0 small"><a th:href="@{/login}" th:text="#{login.submit}">Sign in</a></p>
+    <p class="text-center mt-3 mb-0 small"><a class="back-link" th:href="@{/login}"><i class="bi bi-arrow-left"></i><span th:text="#{forgot.back}">Back to sign in</span></a></p>
   </div></div>
 </main>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>

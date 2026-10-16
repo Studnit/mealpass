@@ -19,86 +19,57 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class I18nIT extends AbstractIntegrationTest {
 
-    @Autowired
-    MockMvc mvc;
+	@Autowired
+	MockMvc mvc;
 
-    @Autowired
-    MessageSource messages;
+	@Autowired
+	MessageSource messages;
 
-    @Test
-    void loginPageRendersInEachLanguage() throws Exception {
-        for (String lang : new String[]{"en", "mr", "hi"}) {
-            String html = mvc.perform(
-                    get("/login").param("lang", lang)
-            ).andExpect(status().isOk())
-             .andReturn()
-             .getResponse()
-             .getContentAsString();
+	@Test
+	void loginPageRendersInEachLanguage() throws Exception {
+		for (String lang : new String[] { "en", "mr", "hi" }) {
+			String html = mvc.perform(get("/login").param("lang", lang)).andExpect(status().isOk()).andReturn()
+					.getResponse().getContentAsString();
 
-            assertThat(html).doesNotContain("??");
-        }
+			assertThat(html).doesNotContain("??");
+		}
 
-        String mr = mvc.perform(
-                get("/login").param("lang", "mr")
-        ).andReturn().getResponse().getContentAsString();
+		String mr = mvc.perform(get("/login").param("lang", "mr")).andReturn().getResponse().getContentAsString();
 
-        String en = mvc.perform(
-                get("/login").param("lang", "en")
-        ).andReturn().getResponse().getContentAsString();
+		String en = mvc.perform(get("/login").param("lang", "en")).andReturn().getResponse().getContentAsString();
 
-        assertThat(mr)
-                .isNotEqualTo(en)
-                .containsPattern("[\\u0900-\\u097F]");
-    }
+		assertThat(mr).isNotEqualTo(en).containsPattern("[\\u0900-\\u097F]");
+	}
 
-    @Test
-    void everyEnglishKeyHasMarathiAndHindiTranslations() throws Exception {
+	@Test
+	void everyEnglishKeyHasMarathiAndHindiTranslations() throws Exception {
 
-        Properties en = load("messages.properties");
+		Properties en = load("messages.properties");
 
-        for (String file : new String[]{
-                "messages_mr.properties",
-                "messages_hi.properties"
-        }) {
-            Properties other = load(file);
+		for (String file : new String[] { "messages_mr.properties", "messages_hi.properties" }) {
+			Properties other = load(file);
 
-            assertThat(other.stringPropertyNames())
-                    .as(file)
-                    .containsAll(en.stringPropertyNames());
-        }
+			assertThat(other.stringPropertyNames()).as(file).containsAll(en.stringPropertyNames());
+		}
 
-        String firstKey = en.stringPropertyNames()
-                .iterator()
-                .next();
+		String firstKey = en.stringPropertyNames().iterator().next();
 
-        assertThat(
-                messages.getMessage(
-                        firstKey,
-                        null,
-                        Locale.forLanguageTag("mr")
-                )
-        ).isNotBlank();
-    }
+		assertThat(messages.getMessage(firstKey, null, Locale.forLanguageTag("mr"))).isNotBlank();
+	}
 
-    private static Properties load(String name) throws Exception {
-        Properties properties = new Properties();
+	private static Properties load(String name) throws Exception {
+		Properties properties = new Properties();
 
-        var resource = I18nIT.class.getClassLoader()
-                .getResourceAsStream(name);
+		var resource = I18nIT.class.getClassLoader().getResourceAsStream(name);
 
-        if (resource == null) {
-            throw new IllegalStateException(
-                    "Missing message properties file: " + name
-            );
-        }
+		if (resource == null) {
+			throw new IllegalStateException("Missing message properties file: " + name);
+		}
 
-        try (var reader = new InputStreamReader(
-                resource,
-                StandardCharsets.UTF_8
-        )) {
-            properties.load(reader);
-        }
+		try (var reader = new InputStreamReader(resource, StandardCharsets.UTF_8)) {
+			properties.load(reader);
+		}
 
-        return properties;
-    }
+		return properties;
+	}
 }

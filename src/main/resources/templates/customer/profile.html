@@ -16,7 +16,10 @@
         <option value="mr" th:selected="${user.preferredLanguage == 'mr'}" th:text="#{lang.mr}">Marathi</option>
         <option value="hi" th:selected="${user.preferredLanguage == 'hi'}" th:text="#{lang.hi}">Hindi</option>
       </select></div>
-    <button class="btn btn-brand" type="submit" th:text="#{action.save}">Save</button>
+    <div class="form-actions">
+      <button type="button" class="btn btn-outline-secondary" data-back th:attr="data-fallback=@{/customer/dashboard}"><i class="bi bi-x-lg"></i><span th:text="#{action.cancel}">Cancel</span></button>
+      <button class="btn btn-brand" type="submit"><i class="bi bi-check-lg"></i><span th:text="#{action.save}">Save</span></button>
+    </div>
   </form>
 </section>
 </body>

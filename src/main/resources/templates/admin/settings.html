@@ -12,7 +12,7 @@
     <div class="row g-2">
       <div class="col-md-5"><label class="form-label" for="sk" th:text="#{admin.setting.key}">Key</label><input class="form-control" id="sk" name="key" required pattern="[a-z0-9_.]{1,80}" maxlength="80"></div>
       <div class="col-md-5"><label class="form-label" for="sv" th:text="#{admin.setting.value}">Value</label><input class="form-control" id="sv" name="value" required maxlength="500"></div>
-      <div class="col-md-2 d-grid align-items-end"><button class="btn btn-brand" type="submit" th:text="#{action.save}">Save</button></div>
+      <div class="col-md-2 d-flex align-items-end"><button class="btn btn-brand w-100" type="submit"><i class="bi bi-check-lg"></i><span th:text="#{action.save}">Save</span></button></div>
     </div>
   </form>
 </section>

@@ -14,9 +14,9 @@
       <dt class="col-5" th:text="#{col.status}">Status</dt><dd class="col-7"><span th:replace="~{fragments/ui :: badge(${r.status})}"></span></dd>
       <dt class="col-5" th:text="#{receipt.remaining}">Remaining</dt><dd class="col-7"><strong class="token-big" th:text="${r.remaining}">0</strong></dd>
     </dl>
-    <div class="d-grid gap-2 no-print">
-      <a class="btn btn-brand" th:href="@{/customer/dashboard}" th:text="#{nav.dashboard}">Home</a>
-      <button class="btn btn-outline-secondary" type="button" onclick="window.print()"><i class="bi bi-printer"></i> <span th:text="#{qr.print}">Print</span></button>
+    <div class="actions split stack no-print">
+      <button class="btn btn-outline-secondary" type="button" data-print><i class="bi bi-printer"></i><span th:text="#{qr.print}">Print</span></button>
+      <a class="btn btn-brand" th:href="@{/customer/dashboard}"><i class="bi bi-check-lg"></i><span th:text="#{action.done}">Done</span></a>
     </div>
   </div>
 </section>

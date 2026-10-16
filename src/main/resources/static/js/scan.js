@@ -9,6 +9,8 @@
   var video = document.getElementById('video');
   var status = document.getElementById('scanStatus');
   var startBtn = document.getElementById('startScan');
+  var stopBtn = document.getElementById('stopScan');
+  var box = document.getElementById('scanBox');
   var canvas = document.createElement('canvas');
   var ctx = canvas.getContext('2d', { willReadFrequently: true });
   var stream = null, running = false;
@@ -46,9 +48,18 @@
     requestAnimationFrame(tick);
   }
 
+  function ui(on) {
+    if (box) box.classList.toggle('idle', !on);
+    if (startBtn) startBtn.classList.toggle('d-none', on);
+    if (stopBtn) stopBtn.classList.toggle('d-none', !on);
+  }
+
   function stop() {
     running = false;
     if (stream) stream.getTracks().forEach(function (t) { t.stop(); });
+    stream = null;
+    if (video) video.srcObject = null;
+    ui(false);
   }
 
   function start() {
@@ -58,8 +69,8 @@
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false }).then(function (s) {
       stream = s; video.srcObject = s; video.setAttribute('playsinline', 'true');
       return video.play();
-    }).then(function () { running = true; say('scanning'); requestAnimationFrame(tick); })
-      .catch(function () { say('denied'); });
+    }).then(function () { running = true; ui(true); say('scanning'); requestAnimationFrame(tick); })
+      .catch(function () { stop(); say('denied'); });
   }
 
   // Fallback: open the phone's native camera app, take a photo of the QR, decode it here.
@@ -89,5 +100,6 @@
   });
 
   if (startBtn) startBtn.addEventListener('click', start);
+  if (stopBtn) stopBtn.addEventListener('click', function () { stop(); say('stopped'); });
   window.addEventListener('pagehide', stop);
 })();
