@@ -34,12 +34,11 @@ public class QrService {
     private final HotelQrCodeRepository qrs;
     private final HotelRepository hotels;
     private final AuditService audit;
-    private final String baseUrl;
+    private final com.mealtoken.util.PublicUrl publicUrl;
 
     public QrService(HotelQrCodeRepository qrs, HotelRepository hotels, AuditService audit,
-                     @Value("${app.public-base-url:http://localhost:8080}") String baseUrl) {
-        this.qrs = qrs; this.hotels = hotels; this.audit = audit;
-        this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+                     com.mealtoken.util.PublicUrl publicUrl) {
+        this.qrs = qrs; this.hotels = hotels; this.audit = audit; this.publicUrl = publicUrl;
     }
 
     private static String newIdentifier() {
@@ -96,7 +95,7 @@ public class QrService {
         return h;
     }
 
-    public String urlFor(HotelQrCode q) { return baseUrl + "/customer/scan/" + q.getPublicIdentifier(); }
+    public String urlFor(HotelQrCode q) { return publicUrl.url("/customer/scan/" + q.getPublicIdentifier()); }
 
     public byte[] png(String content, int size) {
         try {

@@ -16,7 +16,7 @@ import java.util.*;
 @Service
 public class CustomerService {
     @lombok.Value
-    public static class SlotView { Long id; String name; LocalTime start; LocalTime end; boolean served; }
+    public static class SlotView { Long id; String code; String name; LocalTime start; LocalTime end; boolean served; }
 
     @lombok.Value
     public static class SubView {
@@ -31,6 +31,17 @@ public class CustomerService {
     private final Clock clock;
 
     public CustomerService(JdbcTemplate jdbc, Clock clock) { this.jdbc = jdbc; this.clock = clock; }
+
+    /**
+     * Convenience only (never enforced): which meal to pre-highlight at the hotel's local time.
+     * 10:00-17:00 lunch, 18:00-24:00 dinner; nothing is suggested in the 17:00-18:00 gap or at night.
+     */
+    public String suggestedSlotCode(String hotelTimezone) {
+        LocalTime t = LocalTime.now(clock.withZone(ZoneId.of(hotelTimezone)));
+        if (!t.isBefore(LocalTime.of(10, 0)) && t.isBefore(LocalTime.of(17, 0))) return "LUNCH";
+        if (!t.isBefore(LocalTime.of(18, 0))) return "DINNER";
+        return null;
+    }
 
     @Transactional(readOnly = true)
     public List<SubView> subscriptions(Long customerId, Long onlyHotelId) {
@@ -55,10 +66,10 @@ public class CustomerService {
             int served = 0;
             if ("ACTIVE".equals(status)) {
                 slots = jdbc.query(
-                        "SELECT ms.id, ms.name, ms.start_time, ms.end_time, EXISTS (SELECT 1 FROM meal_attendance a WHERE a.subscription_id = ? "
+                        "SELECT ms.id, ms.code, ms.name, ms.start_time, ms.end_time, EXISTS (SELECT 1 FROM meal_attendance a WHERE a.subscription_id = ? "
                                 + "AND a.attendance_date = ? AND a.meal_slot_id = ms.id AND a.status = 'SERVED') AS served "
                                 + "FROM meal_slots ms WHERE ms.hotel_id = ? AND ms.active ORDER BY ms.start_time",
-                        (rs, i) -> new SlotView(rs.getLong("id"), rs.getString("name"), rs.getTime("start_time").toLocalTime(),
+                        (rs, i) -> new SlotView(rs.getLong("id"), rs.getString("code"), rs.getString("name"), rs.getTime("start_time").toLocalTime(),
                                 rs.getTime("end_time").toLocalTime(), rs.getBoolean("served")),
                         sid, Date.valueOf(today), hid);
                 served = (int) slots.stream().filter(SlotView::isServed).count();

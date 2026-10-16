@@ -38,13 +38,13 @@ public class PasswordResetService {
     private final RequestRateLimiter limiter;
     private final ObjectProvider<Sender> sender;
     private final Clock clock;
-    private final String baseUrl;
+    private final com.mealtoken.util.PublicUrl publicUrl;
 
     public PasswordResetService(UserRepository users, PasswordResetTokenRepository tokens, PasswordEncoder encoder,
                                 AuditService audit, RequestRateLimiter limiter, ObjectProvider<Sender> sender, Clock clock,
-                                @Value("${app.public-base-url:http://localhost:8080}") String baseUrl) {
+                                com.mealtoken.util.PublicUrl publicUrl) {
         this.users = users; this.tokens = tokens; this.encoder = encoder; this.audit = audit;
-        this.limiter = limiter; this.sender = sender; this.clock = clock; this.baseUrl = baseUrl;
+        this.limiter = limiter; this.sender = sender; this.clock = clock; this.publicUrl = publicUrl;
     }
 
     /** Always behaves identically whether or not the email exists (no account enumeration). */
@@ -62,7 +62,7 @@ public class PasswordResetService {
             t.setTokenHash(hash(token));
             t.setExpiresAt(clock.instant().plus(Duration.ofMinutes(30)));
             tokens.save(t);
-            String link = baseUrl + "/reset/" + token;
+            String link = publicUrl.url("/reset/" + token);
             Sender s = sender.getIfAvailable();
             if (s != null) s.send(u, link);
             else log.warn("PASSWORD RESET LINK for {} (no email sender configured): {}", u.getEmail(), link);

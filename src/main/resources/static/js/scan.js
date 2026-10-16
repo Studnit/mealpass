@@ -20,7 +20,7 @@
       try {
         var u = new URL(text);
         var m = u.pathname.match(/^\/customer\/scan\/([A-Za-z0-9_-]{16,64})$/);
-        if (m && u.origin === window.location.origin) { window.location.href = '/customer/scan/' + m[1]; return true; }
+        if (m) { window.location.href = '/customer/scan/' + m[1]; return true; }
       } catch (e) { /* not a URL */ }
       say('invalid');
       return false;
@@ -52,6 +52,8 @@
   }
 
   function start() {
+    // Browsers only expose the live camera on HTTPS (or localhost). The photo button below works everywhere.
+    if (!window.isSecureContext) { say('insecure'); return; }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { say('nocamera'); return; }
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false }).then(function (s) {
       stream = s; video.srcObject = s; video.setAttribute('playsinline', 'true');
@@ -59,6 +61,26 @@
     }).then(function () { running = true; say('scanning'); requestAnimationFrame(tick); })
       .catch(function () { say('denied'); });
   }
+
+  // Fallback: open the phone's native camera app, take a photo of the QR, decode it here.
+  var photo = document.getElementById('photoInput');
+  if (photo) photo.addEventListener('change', function () {
+    var file = photo.files && photo.files[0];
+    if (!file) return;
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onload = function () {
+      var max = 1600, scale = Math.min(1, max / Math.max(img.width, img.height));
+      canvas.width = Math.round(img.width * scale); canvas.height = Math.round(img.height * scale);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      var code = window.jsQR && window.jsQR(data.data, data.width, data.height, { inversionAttempts: 'attemptBoth' });
+      if (!code || !code.data || !handle(code.data)) say('photofail');
+      photo.value = '';
+    };
+    img.onerror = function () { say('photofail'); };
+    img.src = url;
+  });
 
   var manual = document.getElementById('manualForm');
   if (manual) manual.addEventListener('submit', function (e) {

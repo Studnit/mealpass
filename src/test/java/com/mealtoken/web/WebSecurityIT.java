@@ -47,6 +47,15 @@ class WebSecurityIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void pwaFilesArePublic() throws Exception {
+        mvc.perform(get("/manifest.webmanifest")).andExpect(status().isOk());
+        mvc.perform(get("/sw.js")).andExpect(status().isOk());
+        mvc.perform(get("/offline.html")).andExpect(status().isOk());
+        mvc.perform(get("/icons/icon-192.png")).andExpect(status().isOk());
+        mvc.perform(get("/login")).andExpect(header().string("Permissions-Policy", org.hamcrest.Matchers.containsString("camera=(self)")));
+    }
+
+    @Test
     void postWithoutCsrfTokenIsRejected() throws Exception {
         mvc.perform(post("/login").param("username", "a@b.c").param("password", "x")).andExpect(status().isForbidden());
     }

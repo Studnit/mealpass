@@ -50,7 +50,7 @@ Java 17, Maven 3.9+, PostgreSQL 14+ (16 recommended). Docker is optional (for Co
 |---|---|---|
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL | localhost / mealtoken |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Bootstrap Super Admin | change in production |
-| `PUBLIC_BASE_URL` | URL phones can reach; encoded into hotel QR codes | http://localhost:8080 |
+| `PUBLIC_BASE_URL` | Public address (e.g. `https://meals.example.com`) put in hotel QR codes and reset links. Read from config only: change it and restart, nothing in the database changes. Empty = address of the current request | empty |
 | `QR_SECRET` | HMAC key for customer passes, at least 16 chars. **Must be unique in production** | dev value (logs a warning) |
 | `UPLOAD_DIR` | Hotel logos | `uploads` |
 | `COOKIE_SECURE` | `true` behind HTTPS | false |
@@ -63,6 +63,21 @@ Java 17, Maven 3.9+, PostgreSQL 14+ (16 recommended). Docker is optional (for Co
 `X-Signature: <hex HMAC-SHA256 of the raw body using APP_PAYMENT_WEBHOOK_SECRET>`. Bad signatures get 401; an amount that
 differs from the payment gets 422; replays are harmless. `HmacPaymentGateway` is a generic verifier: implement `PaymentGateway`
 for a specific provider (Razorpay, Stripe, ...) and add its SDK/redirect flow.
+
+## Install on a phone (PWA) and camera scanning
+The app is a Progressive Web App: open it in Chrome (Android) and tap **Install app**, or in Safari (iPhone) use Share > Add to Home Screen.
+It then opens full-screen with its own icon.
+
+**The live camera and "Install app" only work over HTTPS** (browsers refuse camera access on plain `http://192.168.x.x` or an IP address; `localhost` is the only exception).
+If the camera does nothing, that is the cause. Fixes:
+1. Deploy behind HTTPS: `DOMAIN=meals.example.com docker compose --profile https up -d` (Caddy gets a certificate automatically), and set
+   `PUBLIC_BASE_URL=https://meals.example.com` and `COOKIE_SECURE=true` so hotel QR codes carry the https address.
+2. For quick phone testing from your laptop, use a tunnel such as `cloudflared tunnel --url http://localhost:8080` or `ngrok http 8080` and use that https URL as `PUBLIC_BASE_URL`.
+3. Even without HTTPS the **Take a photo of the QR** button works: it opens the phone's own camera app and reads the photo.
+The QR contains only this address plus a random hotel code, so after changing the domain the QR shown in the app is correct immediately; QR codes already printed with the old domain must be reprinted.
+
+**Meal suggestion:** after scanning, the meal matching the hotel's local time is pre-highlighted (10:00-17:00 Lunch, 18:00-24:00 Dinner).
+It is only a convenience; the customer can pick any other meal. Default slot times for new hotels follow the same windows; owners can edit them.
 
 ## Tests
 ```bash

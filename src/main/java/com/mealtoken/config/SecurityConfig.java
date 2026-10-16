@@ -25,12 +25,14 @@ public class SecurityConfig {
             .addFilterBefore(limiter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(a -> a
                 .requestMatchers("/login", "/register", "/forgot", "/reset/**", "/css/**", "/js/**", "/img/**", "/error",
-                                 "/hotel-logo/**", "/actuator/health", "/webhooks/**").permitAll()
+                                 "/hotel-logo/**", "/actuator/health", "/webhooks/**", "/manifest.webmanifest", "/sw.js", "/offline.html", "/icons/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/owner/**").hasRole("OWNER")
                 .requestMatchers("/staff/**").hasRole("STAFF")
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
                 .anyRequest().authenticated())
+            .headers(h -> h.addHeaderWriter(new org.springframework.security.web.header.writers.StaticHeadersWriter(
+                "Permissions-Policy", "camera=(self), microphone=(), geolocation=()")))
             .formLogin(f -> f
                 .loginPage("/login")
                 .successHandler(success)   // returns to the page the user wanted (e.g. a scanned QR URL), else /home

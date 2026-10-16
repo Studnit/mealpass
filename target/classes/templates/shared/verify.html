@@ -14,12 +14,14 @@
     <div class="col-12 col-lg-6">
       <div class="card card-body">
         <h2 class="h6" th:text="#{verify.scan.pass}">Scan customer pass</h2>
-        <div id="scanner" data-mode="pass" th:attr="data-msg-scanning=#{scan.scanning},data-msg-denied=#{scan.denied},data-msg-nocamera=#{scan.nocamera},data-msg-invalid=#{scan.invalid}">
+        <div id="scanner" data-mode="pass" th:attr="data-msg-scanning=#{scan.scanning},data-msg-denied=#{scan.denied},data-msg-nocamera=#{scan.nocamera},data-msg-invalid=#{scan.invalid},data-msg-insecure=#{scan.insecure},data-msg-photofail=#{scan.photofail}">
           <video id="video" muted playsinline class="mb-2" th:attr="aria-label=#{scan.camera}"></video>
           <div class="d-flex gap-2 align-items-center">
             <button id="startScan" type="button" class="btn btn-brand"><i class="bi bi-camera"></i> <span th:text="#{scan.start}">Start camera</span></button>
             <span id="scanStatus" class="text-muted" role="status"></span>
           </div>
+          <label class="btn btn-outline-primary mt-2" for="photoInput"><i class="bi bi-image"></i> <span th:text="#{scan.photo}">Take a photo of the QR</span></label>
+          <input id="photoInput" type="file" accept="image/*" capture="environment" class="d-none">
         </div>
         <form id="passForm" method="post" th:action="@{/{a}/verify/lookup(a=${area})}" data-multi>
           <input type="hidden" id="token" name="token">
@@ -36,7 +38,7 @@
       </form>
     </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script th:src="@{/js/jsQR.min.js}"></script>
   <script th:src="@{/js/scan.js}"></script>
 </section>
 </body>

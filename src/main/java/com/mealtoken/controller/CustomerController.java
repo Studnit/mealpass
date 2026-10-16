@@ -122,6 +122,7 @@ public class CustomerController {
         m.addAttribute("sub", customers.subscriptions(u.getId(), h.getId()).stream()
                 .filter(s -> "ACTIVE".equals(s.getStatus())).findFirst().orElse(null));
         m.addAttribute("plans", plans.findByHotelIdAndActiveTrueOrderByPrice(h.getId()));
+        m.addAttribute("suggested", customers.suggestedSlotCode(h.getTimezone()));
         m.addAttribute("key", UUID.randomUUID().toString()); // idempotency key for this confirmation screen
         m.addAttribute("section", "scan");
         return "customer/redeem";

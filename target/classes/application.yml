@@ -25,6 +25,7 @@ spring:
       max-request-size: 2MB
 server:
   port: ${PORT:8080}
+  forward-headers-strategy: framework   # behind an HTTPS reverse proxy, keep the original scheme/host
   servlet:
     session:
       timeout: 30m
@@ -38,8 +39,10 @@ management:
       exposure:
         include: health,info
 app:
-  # Absolute URL customers' phones can reach; it is encoded in the hotel QR code.
-  public-base-url: ${PUBLIC_BASE_URL:http://localhost:8080}
+  # Public address of the app (e.g. https://meals.example.com), encoded in hotel QR codes and reset links.
+  # Only the QR identifier is stored in the database, so changing this value re-points every QR on restart.
+  # Leave empty to use the address of the current request.
+  public-base-url: ${PUBLIC_BASE_URL:}
   upload-dir: ${UPLOAD_DIR:uploads}
   security:
     # HMAC key for customer pass tokens. MUST be overridden in production (>= 16 chars).

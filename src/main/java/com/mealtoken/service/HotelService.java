@@ -68,8 +68,8 @@ public class HotelService {
 
     private void provisionDefaults(Hotel h) {
         if (slots.findByHotelIdOrderByStartTime(h.getId()).isEmpty()) {
-            slots.save(slot(h.getId(), "LUNCH", "Lunch", LocalTime.of(12, 0), LocalTime.of(15, 0)));
-            slots.save(slot(h.getId(), "DINNER", "Dinner", LocalTime.of(19, 0), LocalTime.of(22, 0)));
+            slots.save(slot(h.getId(), "LUNCH", "Lunch", LocalTime.of(10, 0), LocalTime.of(17, 0)));
+            slots.save(slot(h.getId(), "DINNER", "Dinner", LocalTime.of(18, 0), LocalTime.of(23, 59)));
         }
         if (plans.findByHotelIdOrderByPrice(h.getId()).isEmpty()) {
             // Drafts: inactive with price 0 so an owner must consciously price and publish them.

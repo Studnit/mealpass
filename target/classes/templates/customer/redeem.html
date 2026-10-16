@@ -29,8 +29,10 @@
       <input type="hidden" name="key" th:value="${key}">
       <h2 class="h6" th:text="#{redeem.choose}">Choose the meal</h2>
       <p class="small text-muted" th:text="#{redeem.confirm.note}">One token will be used when you confirm.</p>
+      <p class="small" th:if="${suggested != null}"><i class="bi bi-clock"></i> <span th:text="#{redeem.suggested}">Suggested for this time</span>:
+        <strong th:each="sl : ${sub.slots}" th:if="${sl.code == suggested}" th:text="${sl.name}">Lunch</strong></p>
       <div class="d-grid gap-2">
-        <button th:each="sl : ${sub.slots}" class="btn btn-brand slot-btn" type="submit" name="slotId" th:value="${sl.id}"
+        <button th:each="sl : ${sub.slots}" class="btn slot-btn" th:classappend="${sl.code == suggested} ? 'btn-brand btn-lg' : 'btn-outline-secondary'" type="submit" name="slotId" th:value="${sl.id}"
                 th:disabled="${sl.served or !sub.redeemable}">
           <i class="bi bi-egg-fried me-1"></i><span th:text="${sl.name}">Lunch</span>
           <small th:text="${#temporals.format(sl.start, 'HH:mm')} + '–' + ${#temporals.format(sl.end, 'HH:mm')}">12:00–15:00</small>
