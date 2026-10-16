@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<!-- ===== role navigation (shared by sidebar and mobile drawer) ===== -->
+<th:block th:fragment="navlinks(active)">
+  <div sec:authorize="hasRole('OWNER')" class="nav-list">
+    <a th:replace="~{fragments/nav :: item('/owner/dashboard', 'dashboard', 'speedometer2', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/hotel', 'hotel', 'building', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/plans', 'plans', 'tags', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/table/subscriptions', 'customers', 'people', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/requests', 'requests', 'inbox', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/table/subscriptions?status=ACTIVE', 'active', 'check2-circle', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/qr', 'qr', 'qr-code', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/verify', 'verify', 'person-check', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/table/attendance', 'attendance', 'calendar-check', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/table/ledger', 'ledger', 'journal-text', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/table/payments', 'payments', 'cash-coin', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/staff', 'staff', 'person-badge', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/notifications', 'notifications', 'bell', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/reports', 'reports', 'bar-chart-line', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/owner/table/audit', 'audit', 'shield-check', ${active})}"></a>
+  </div>
+  <div sec:authorize="hasRole('STAFF')" class="nav-list">
+    <a th:replace="~{fragments/nav :: item('/staff/dashboard', 'dashboard', 'speedometer2', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/staff/verify', 'verify', 'person-check', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/staff/table/attendance', 'attendance', 'calendar-check', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/notifications', 'notifications', 'bell', ${active})}"></a>
+  </div>
+  <div sec:authorize="hasRole('CUSTOMER')" class="nav-list">
+    <a th:replace="~{fragments/nav :: item('/customer/dashboard', 'dashboard', 'house', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/customer/hotels', 'hotels', 'search', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/customer/subscriptions', 'subscriptions', 'card-checklist', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/customer/scan', 'scan', 'qr-code-scan', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/customer/today', 'today', 'egg-fried', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/customer/table/my_tokens', 'c_tokens', 'coin', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/customer/table/my_attendance', 'c_attendance', 'calendar-check', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/customer/table/my_payments', 'c_payments', 'cash-coin', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/notifications', 'notifications', 'bell', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/customer/pass', 'pass', 'person-vcard', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/customer/profile', 'profile', 'person-gear', ${active})}"></a>
+  </div>
+  <div sec:authorize="hasRole('SUPER_ADMIN')" class="nav-list">
+    <a th:replace="~{fragments/nav :: item('/admin/dashboard', 'dashboard', 'speedometer2', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/admin/hotels', 'a_hotels', 'buildings', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/admin/users', 'a_users', 'people', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/admin/audit', 'a_audit', 'shield-check', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/admin/settings', 'a_settings', 'gear', ${active})}"></a>
+    <a th:replace="~{fragments/nav :: item('/notifications', 'notifications', 'bell', ${active})}"></a>
+  </div>
+</th:block>
+
+<a th:fragment="item(href, key, icon, active)" class="side-link" th:href="@{${href}}"
+   th:classappend="${active == key} ? 'active'" th:attr="aria-current=${active == key} ? 'page' : null">
+  <i th:class="'bi bi-' + ${icon}" aria-hidden="true"></i> <span th:text="#{${'nav.' + key}}">Item</span>
+</a>
+
+
+</body>
+</html>

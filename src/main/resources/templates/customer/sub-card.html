@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="card(s, showSlots)" class="card h-100">
+  <div class="card-body">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <span th:replace="~{fragments/ui :: logo(${s.hotelId}, ${s.hasLogo}, 48)}"></span>
+      <div class="flex-grow-1">
+        <h2 class="h6 m-0" th:text="${s.hotelName}">Hotel</h2>
+        <small class="text-muted" th:text="${s.planName}">Plan</small>
+      </div>
+      <span th:replace="~{fragments/ui :: badge(${s.status})}"></span>
+    </div>
+
+    <div th:if="${s.status == 'ACTIVE' or s.status == 'EXHAUSTED' or s.status == 'EXPIRED' or s.status == 'SUSPENDED'}">
+      <div class="row text-center g-2 mb-2">
+        <div class="col-4"><div class="token-big" th:text="${s.remaining}">0</div><small class="text-muted" th:text="#{receipt.remaining}">Remaining</small></div>
+        <div class="col-4"><div class="h3 m-0" th:text="${s.used}">0</div><small class="text-muted" th:text="#{sub.used}">Used</small></div>
+        <div class="col-4"><div class="h3 m-0" th:text="${s.total}">0</div><small class="text-muted" th:text="#{sub.total}">Total</small></div>
+      </div>
+      <div class="progress mb-3" role="progressbar" th:attr="aria-valuenow=${s.percentUsed},aria-valuemin=0,aria-valuemax=100,aria-label=#{sub.used}">
+        <div class="progress-bar bg-warning" th:style="'width:' + ${s.percentUsed} + '%'"></div></div>
+      <dl class="row small mb-2">
+        <dt class="col-5" th:text="#{sub.start}">Start</dt><dd class="col-7" th:text="${@fmt.date(s.start)}">d</dd>
+        <dt class="col-5" th:text="#{col.expiry}">Expiry</dt><dd class="col-7"><span th:text="${@fmt.date(s.expiry)}">d</span>
+          <span th:if="${s.status == 'ACTIVE'}" class="text-muted" th:text="'(' + #{sub.days.left(${s.daysLeft})} + ')'">(5 days left)</span></dd>
+      </dl>
+      <p class="small text-muted mb-2" th:if="${s.status == 'ACTIVE'}"
+         th:text="${s.tokensExpire} ? #{sub.tokens.expire} : #{sub.tokens.keep}">Unused tokens expire with the subscription.</p>
+    </div>
+    <p th:if="${s.status == 'PENDING'}" class="text-muted small" th:text="#{sub.pending.help}">Awaiting payment confirmation by the hotel.</p>
+
+    <div th:if="${showSlots and s.status == 'ACTIVE'}">
+      <h3 class="h6" th:text="#{sub.today}">Today</h3>
+      <ul class="list-group list-group-flush mb-3">
+        <li class="list-group-item d-flex justify-content-between align-items-center px-0" th:each="sl : ${s.slots}">
+          <span><span th:text="${sl.name}">Lunch</span> <small class="text-muted" th:text="${#temporals.format(sl.start, 'HH:mm')} + '–' + ${#temporals.format(sl.end, 'HH:mm')}">12:00–15:00</small></span>
+          <span th:if="${sl.served}" class="badge text-bg-success" th:text="#{redeem.served}">Served</span>
+          <span th:unless="${sl.served}" class="badge text-bg-secondary" th:text="#{redeem.available}">Available</span>
+        </li>
+      </ul>
+    </div>
+    <div class="d-grid gap-2">
+      <a th:if="${s.redeemable}" class="btn btn-brand" th:href="@{/customer/scan}"><i class="bi bi-qr-code-scan"></i> <span th:text="#{nav.scan}">Scan</span></a>
+      <a th:if="${s.status != 'ACTIVE' and s.status != 'PENDING'}" class="btn btn-outline-secondary" th:href="@{/customer/hotels/{id}(id=${s.hotelId})}"><i class="bi bi-arrow-repeat"></i> <span th:text="#{sub.renew}">Renew</span></a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

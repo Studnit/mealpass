@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{receipt.title}, ${section}, ~{::section})}">
+<body>
+<section>
+  <div class="card card-body text-center mx-auto" style="max-width: 460px;">
+    <i class="bi bi-check-circle-fill display-3 text-success"></i>
+    <h1 class="h4 mt-2" th:text="#{receipt.title}">Meal confirmed</h1>
+    <dl class="row text-start mt-3">
+      <dt class="col-5" th:text="#{col.hotel}">Hotel</dt><dd class="col-7" th:text="${r.hotel}">H</dd>
+      <dt class="col-5" th:text="#{col.meal}">Meal</dt><dd class="col-7" th:text="${r.meal}">M</dd>
+      <dt class="col-5" th:text="#{col.date}">Date</dt><dd class="col-7" th:text="${@fmt.date(r.day)}">D</dd>
+      <dt class="col-5" th:text="#{col.time}">Time</dt><dd class="col-7" th:text="${r.time_at}">T</dd>
+      <dt class="col-5" th:text="#{col.ref}">Reference</dt><dd class="col-7"><code th:text="${r.ref}">REF</code></dd>
+      <dt class="col-5" th:text="#{col.status}">Status</dt><dd class="col-7"><span th:replace="~{fragments/ui :: badge(${r.status})}"></span></dd>
+      <dt class="col-5" th:text="#{receipt.remaining}">Remaining</dt><dd class="col-7"><strong class="token-big" th:text="${r.remaining}">0</strong></dd>
+    </dl>
+    <div class="d-grid gap-2 no-print">
+      <a class="btn btn-brand" th:href="@{/customer/dashboard}" th:text="#{nav.dashboard}">Home</a>
+      <button class="btn btn-outline-secondary" type="button" onclick="window.print()"><i class="bi bi-printer"></i> <span th:text="#{qr.print}">Print</span></button>
+    </div>
+  </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,38 @@
+:root { --brand: #b45309; --brand-dark: #92400e; --bg: #faf7f2; --ink: #1f2937; }
+body { font-family: "Noto Sans", "Noto Sans Devanagari", system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+.text-brand { color: var(--brand) !important; }
+.btn-brand { background: var(--brand); border-color: var(--brand); color: #fff; }
+.btn-brand:hover, .btn-brand:focus { background: var(--brand-dark); border-color: var(--brand-dark); color: #fff; }
+.btn:focus-visible, .form-control:focus, .form-select:focus { box-shadow: 0 0 0 .2rem rgba(180,83,9,.35); }
+.auth-bg { min-height: 100vh; }
+.app-shell { display: flex; min-height: calc(100vh - 57px); }
+.sidebar { width: 230px; background: #fff; border-right: 1px solid #e5e7eb; padding: 1rem .5rem; flex-shrink: 0; }
+.side-link { display: flex; gap: .6rem; align-items: center; padding: .6rem .9rem; border-radius: .5rem; color: var(--ink); text-decoration: none; }
+.side-link:hover { background: #f3efe8; }
+.side-link.active { background: #fef3c7; color: var(--brand-dark); font-weight: 600; }
+.content { flex: 1; min-width: 0; }
+.stat { border: 0; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.stat-label { font-size: .85rem; color: #6b7280; }
+.stat-value { font-size: 1.9rem; font-weight: 700; }
+
+/* ---- phase 2-6 additions ---- */
+.stat-icon { width: 44px; height: 44px; border-radius: .75rem; background: #fef3c7; color: var(--brand-dark); display: grid; place-items: center; font-size: 1.3rem; flex-shrink: 0; }
+.hotel-logo { display: inline-grid; place-items: center; border-radius: .75rem; background: #fef3c7; color: var(--brand-dark); overflow: hidden; flex-shrink: 0; font-size: 1.4rem; }
+.hotel-logo img { width: 100%; height: 100%; object-fit: cover; }
+.scan-fab { position: fixed; right: 1rem; bottom: 1rem; z-index: 1030; display: inline-flex; align-items: center; gap: .5rem; padding: .85rem 1.2rem; border-radius: 999px;
+  background: var(--brand); color: #fff; font-weight: 600; text-decoration: none; box-shadow: 0 6px 18px rgba(146,64,14,.4); }
+.scan-fab:hover, .scan-fab:focus-visible { background: var(--brand-dark); color: #fff; }
+.scan-fab i { font-size: 1.4rem; }
+.side-link:focus-visible, .scan-fab:focus-visible, a:focus-visible { outline: 3px solid rgba(180,83,9,.55); outline-offset: 2px; }
+.token-big { font-size: 2.6rem; font-weight: 700; line-height: 1; color: var(--brand-dark); }
+.slot-btn { min-height: 64px; font-size: 1.1rem; }
+#scanner video { width: 100%; max-height: 60vh; background: #111; border-radius: .75rem; }
+.table-sort a { color: inherit; text-decoration: none; white-space: nowrap; }
+.chart-box { position: relative; height: 260px; }
+.qr-img { width: min(320px, 100%); height: auto; image-rendering: pixelated; }
+.progress { height: .7rem; }
+@media (max-width: 767.98px) { .content { padding-bottom: 5.5rem !important; } }
+@media print {
+  nav, .sidebar, .scan-fab, .no-print, .offcanvas { display: none !important; }
+  .content { padding: 0 !important; } body { background: #fff; }
+}

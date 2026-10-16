@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{${def.titleKey}}, ${section}, ~{::section})}">
+<body>
+<section>
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <h1 class="h4 m-0" th:text="#{${def.titleKey}}">Title</h1>
+    <a class="btn btn-outline-secondary btn-sm no-print"
+       th:href="@{${base} + '/export'(q=${result.query.q},status=${result.query.status},from=${result.query.from},to=${result.query.to},sort=${result.query.sort},dir=(${result.query.desc} ? 'desc' : 'asc'))}">
+      <i class="bi bi-download"></i> <span th:text="#{table.export}">Export CSV</span>
+    </a>
+  </div>
+
+  <form method="get" th:action="@{${base}}" class="card card-body mb-3 no-print" data-multi>
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-4" th:if="${def.searchable}">
+        <label class="form-label" for="q" th:text="#{table.search}">Search</label>
+        <input class="form-control" id="q" name="q" th:value="${result.query.q}" maxlength="100">
+      </div>
+      <div class="col-6 col-md-2" th:if="${def.statusKey != null}">
+        <label class="form-label" for="status" th:text="#{table.status}">Status</label>
+        <select class="form-select" id="status" name="status">
+          <option value="" th:text="#{table.all}">All</option>
+          <option th:each="s : ${def.statusOptions}" th:value="${s}" th:text="#{${'status.' + s}}" th:selected="${s == result.query.status}">S</option>
+        </select>
+      </div>
+      <th:block th:if="${def.dated}">
+        <div class="col-6 col-md-2">
+          <label class="form-label" for="from" th:text="#{table.from}">From</label>
+          <input class="form-control" type="date" id="from" name="from" th:value="${result.query.from}">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label" for="to" th:text="#{table.to}">To</label>
+          <input class="form-control" type="date" id="to" name="to" th:value="${result.query.to}">
+        </div>
+      </th:block>
+      <div class="col-6 col-md-2 d-grid">
+        <button class="btn btn-brand" type="submit"><i class="bi bi-funnel"></i> <span th:text="#{table.apply}">Apply</span></button>
+      </div>
+    </div>
+  </form>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th scope="col" class="table-sort" th:each="c : ${result.cols}"
+                th:attr="aria-sort=${result.query.sort == c.key} ? (${result.query.desc} ? 'descending' : 'ascending') : 'none'">
+              <a th:href="@{${base}(q=${result.query.q},status=${result.query.status},from=${result.query.from},to=${result.query.to},sort=${c.key},dir=(${result.query.sort == c.key and result.query.desc} ? 'asc' : 'desc'))}">
+                <span th:text="#{${'col.' + c.key}}">Col</span>
+                <i th:if="${result.query.sort == c.key}" th:class="${result.query.desc} ? 'bi bi-caret-down-fill' : 'bi bi-caret-up-fill'" aria-hidden="true"></i>
+              </a>
+            </th>
+            <th scope="col" class="no-print" th:if="${type == 'attendance' or type == 'payments' or type == 'subscriptions'}" th:text="#{col.actions}">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:if="${#lists.isEmpty(result.rows)}">
+            <td th:colspan="${#lists.size(result.cols) + 1}" class="text-center text-muted py-5">
+              <i class="bi bi-inbox fs-1 d-block"></i><span th:text="#{table.empty}">Nothing to show</span>
+            </td>
+          </tr>
+          <tr th:each="row : ${result.rows}">
+            <td th:each="cell : ${row.cells}">
+              <th:block th:if="${cell.kind.name() == 'STATUS'}"><span th:replace="~{fragments/ui :: badge(${cell.raw})}"></span></th:block>
+              <th:block th:unless="${cell.kind.name() == 'STATUS'}"><span th:text="${cell.text}" th:classappend="${cell.kind.name() == 'NUM' or cell.kind.name() == 'MONEY'} ? 'text-nowrap'"></span></th:block>
+            </td>
+
+            <!-- ===== row actions ===== -->
+            <td class="no-print text-nowrap" th:if="${type == 'attendance'}">
+              <form th:if="${isOwner and row.cells[4].raw == 'SERVED'}" th:action="@{/owner/attendance/{id}/reverse(id=${row.id})}" method="post"
+                    class="d-flex gap-1" th:attr="data-confirm=#{confirm.reverse}">
+                <input class="form-control form-control-sm" name="reason" required maxlength="250" th:placeholder="#{action.reason}" th:attr="aria-label=#{action.reason}">
+                <button class="btn btn-sm btn-outline-danger" type="submit" th:text="#{action.reverse}">Reverse</button>
+              </form>
+            </td>
+            <td class="no-print" th:if="${type == 'payments'}">
+              <div th:if="${canConfirm and row.cells[7].raw == 'PENDING'}" class="d-flex flex-wrap gap-1">
+                <form th:action="@{/{a}/payments/{id}/confirm(a=${area},id=${row.id})}" method="post" class="d-flex gap-1"
+                      th:attr="data-confirm=#{confirm.payment}">
+                  <select class="form-select form-select-sm" name="method" th:attr="aria-label=#{col.method}">
+                    <option value="CASH" th:text="#{status.CASH}">Cash</option>
+                    <option value="UPI" th:text="#{status.UPI}" th:selected="${row.cells[5].text != ''}">UPI</option>
+                  </select>
+                  <input class="form-control form-control-sm" name="reference" maxlength="100" th:value="${row.cells[5].text}"
+                         th:placeholder="#{col.reference}" th:attr="aria-label=#{col.reference}">
+                  <button class="btn btn-sm btn-success" type="submit" th:text="#{action.confirm}">Confirm</button>
+                </form>
+                <form th:action="@{/{a}/payments/{id}/reject(a=${area},id=${row.id})}" method="post" th:attr="data-confirm=#{confirm.reject}">
+                  <button class="btn btn-sm btn-outline-danger" type="submit" th:text="#{action.reject}">Reject</button>
+                </form>
+              </div>
+            </td>
+            <td class="no-print" th:if="${type == 'subscriptions'}">
+              <div th:if="${isOwner}" class="d-flex flex-wrap gap-1">
+                <form th:if="${row.cells[8].raw == 'ACTIVE'}" th:action="@{/owner/subscriptions/{id}/suspend(id=${row.id})}" method="post">
+                  <button class="btn btn-sm btn-outline-warning" type="submit" th:text="#{action.suspend}">Suspend</button></form>
+                <form th:if="${row.cells[8].raw == 'SUSPENDED'}" th:action="@{/owner/subscriptions/{id}/resume(id=${row.id})}" method="post">
+                  <button class="btn btn-sm btn-outline-success" type="submit" th:text="#{action.resume}">Resume</button></form>
+                <form th:if="${row.cells[8].raw == 'ACTIVE' or row.cells[8].raw == 'EXPIRED'}" th:action="@{/owner/subscriptions/{id}/extend(id=${row.id})}"
+                      method="post" class="d-flex gap-1">
+                  <input class="form-control form-control-sm" type="date" name="expiry" required th:attr="aria-label=#{action.extend}">
+                  <button class="btn btn-sm btn-outline-primary" type="submit" th:text="#{action.extend}">Extend</button></form>
+                <form th:if="${row.cells[8].raw != 'CANCELLED' and row.cells[8].raw != 'EXPIRED'}" th:action="@{/owner/subscriptions/{id}/cancel(id=${row.id})}"
+                      method="post" th:attr="data-confirm=#{confirm.cancel}">
+                  <button class="btn btn-sm btn-outline-danger" type="submit" th:text="#{action.cancel}">Cancel</button></form>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer d-flex flex-wrap justify-content-between align-items-center gap-2 no-print">
+      <small class="text-muted" th:text="#{table.total(${result.total})}">N rows</small>
+      <nav th:if="${result.pages > 1}" th:attr="aria-label=#{table.pagination}">
+        <ul class="pagination pagination-sm m-0">
+          <li class="page-item" th:classappend="${result.page == 0} ? 'disabled'">
+            <a class="page-link" th:href="@{${base}(q=${result.query.q},status=${result.query.status},from=${result.query.from},to=${result.query.to},sort=${result.query.sort},dir=(${result.query.desc} ? 'desc' : 'asc'),page=${result.page - 1})}"
+               th:text="#{table.prev}">Prev</a></li>
+          <li class="page-item disabled"><span class="page-link" th:text="${result.page + 1} + ' / ' + ${result.pages}">1 / 1</span></li>
+          <li class="page-item" th:classappend="${result.page + 1 >= result.pages} ? 'disabled'">
+            <a class="page-link" th:href="@{${base}(q=${result.query.q},status=${result.query.status},from=${result.query.from},to=${result.query.to},sort=${result.query.sort},dir=(${result.query.desc} ? 'desc' : 'asc'),page=${result.page + 1})}"
+               th:text="#{table.next}">Next</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</section>
+</body>
+</html>

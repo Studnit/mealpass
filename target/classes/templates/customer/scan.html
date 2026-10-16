@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.scan}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-1" th:text="#{nav.scan}">Scan hotel QR</h1>
+  <p class="text-muted" th:text="#{scan.help}">Point your camera at the QR code displayed at the hotel.</p>
+  <div class="card card-body mb-3">
+    <div id="scanner" data-mode="hotel" th:attr="data-msg-scanning=#{scan.scanning},data-msg-denied=#{scan.denied},data-msg-nocamera=#{scan.nocamera},data-msg-invalid=#{scan.invalid}">
+      <video id="video" muted playsinline class="mb-3" th:attr="aria-label=#{scan.camera}"></video>
+      <div class="d-grid d-sm-flex gap-2 align-items-center">
+        <button id="startScan" type="button" class="btn btn-brand btn-lg"><i class="bi bi-camera"></i> <span th:text="#{scan.start}">Start camera</span></button>
+        <span id="scanStatus" class="text-muted" role="status"></span>
+      </div>
+    </div>
+  </div>
+  <form id="manualForm" class="card card-body" data-multi>
+    <label class="form-label" for="manualCode" th:text="#{scan.manual}">Or paste the link shown under the QR code</label>
+    <div class="input-group">
+      <input class="form-control" id="manualCode" inputmode="url" autocomplete="off" maxlength="300">
+      <button class="btn btn-outline-primary" type="submit" th:text="#{scan.open}">Open</button>
+    </div>
+  </form>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script th:src="@{/js/scan.js}"></script>
+</section>
+</body>
+</html>

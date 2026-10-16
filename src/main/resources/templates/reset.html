@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/layout :: head(#{reset.title})}"></head>
+<body class="auth-bg">
+<nav th:replace="~{fragments/layout :: topbar}"></nav>
+<main class="container py-5" style="max-width: 440px;">
+  <div class="card shadow-sm border-0"><div class="card-body p-4">
+    <h1 class="h4 mb-3" th:text="#{reset.title}">Choose a new password</h1>
+    <div class="alert alert-danger" th:if="${err}" th:text="#{${err}}" role="alert"></div>
+    <form th:action="@{/reset/{t}(t=${token})}" method="post">
+      <div class="mb-3"><label for="password" class="form-label" th:text="#{reset.new}">New password</label>
+        <input type="password" id="password" name="password" class="form-control" required minlength="8" maxlength="72" autofocus autocomplete="new-password"></div>
+      <button type="submit" class="btn btn-brand w-100" th:text="#{action.save}">Save</button>
+    </form>
+  </div></div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

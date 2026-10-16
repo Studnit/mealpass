@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.staff}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-3" th:text="#{nav.staff}">Staff</h1>
+  <div class="row g-3">
+    <div class="col-12 col-xl-8">
+      <div class="card">
+        <div class="table-responsive"><table class="table align-middle mb-0">
+          <thead class="table-light"><tr><th th:text="#{col.customer}">Name</th><th>Email</th><th th:text="#{staff.permissions}">Permissions</th><th></th></tr></thead>
+          <tbody>
+            <tr th:if="${#lists.isEmpty(staff)}"><td colspan="4" class="text-center text-muted py-4" th:text="#{table.empty}">Nothing</td></tr>
+            <tr th:each="s : ${staff}">
+              <td><span th:text="${s.name}">N</span><br><small class="text-muted" th:text="${s.phone}">P</small></td>
+              <td th:text="${s.email}">E</td>
+              <td colspan="2">
+                <form method="post" th:action="@{/owner/staff/{id}(id=${s.id})}" class="d-flex flex-wrap align-items-center gap-3">
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="active" value="true" th:id="'a' + ${s.id}" th:checked="${s.active}">
+                    <label class="form-check-label" th:for="'a' + ${s.id}" th:text="#{plan.active}">Active</label></div>
+                  <div class="form-check"><input class="form-check-input" type="checkbox" name="canConfirmPayments" value="true" th:id="'c' + ${s.id}" th:checked="${s.can_confirm}">
+                    <label class="form-check-label" th:for="'c' + ${s.id}" th:text="#{staff.can.confirm}">Can confirm payments</label></div>
+                  <button class="btn btn-sm btn-outline-primary" type="submit" th:text="#{action.save}">Save</button>
+                </form>
+                <form method="post" th:action="@{/owner/staff/{id}/password(id=${s.id})}" class="d-flex gap-1 mt-2" th:attr="data-confirm=#{confirm.staff.password}">
+                  <input class="form-control form-control-sm" type="password" name="password" minlength="8" maxlength="72" required autocomplete="new-password"
+                         th:placeholder="#{staff.new.password}" th:attr="aria-label=#{staff.new.password}">
+                  <button class="btn btn-sm btn-outline-secondary" type="submit" th:text="#{staff.reset}">Reset</button>
+                </form>
+              </td>
+            </tr>
+          </tbody></table></div>
+      </div>
+    </div>
+    <div class="col-12 col-xl-4">
+      <form class="card card-body" method="post" th:action="@{/owner/staff}">
+        <h2 class="h6" th:text="#{staff.new}">New staff account</h2>
+        <div class="mb-2"><label class="form-label" for="fn" th:text="#{register.fullName}">Full name</label>
+          <input class="form-control" id="fn" name="fullName" required maxlength="150"></div>
+        <div class="mb-2"><label class="form-label" for="em" th:text="#{login.email}">Email</label>
+          <input class="form-control" type="email" id="em" name="email" required maxlength="190" autocomplete="off"></div>
+        <div class="mb-2"><label class="form-label" for="ph" th:text="#{register.phone}">Phone</label>
+          <input class="form-control" id="ph" name="phone" maxlength="20"></div>
+        <div class="mb-2"><label class="form-label" for="pw" th:text="#{login.password}">Password</label>
+          <input class="form-control" type="password" id="pw" name="password" required minlength="8" maxlength="72" autocomplete="new-password"></div>
+        <div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="cp" name="canConfirmPayments" value="true">
+          <label class="form-check-label" for="cp" th:text="#{staff.can.confirm}">Can confirm payments</label></div>
+        <button class="btn btn-brand" type="submit" th:text="#{action.add}">Add</button>
+      </form>
+    </div>
+  </div>
+</section>
+</body>
+</html>

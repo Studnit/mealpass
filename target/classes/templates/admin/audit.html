@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.a_audit}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-3" th:text="#{nav.a_audit}">Audit logs</h1>
+  <div class="card mb-4" th:if="${!#lists.isEmpty(suspicious)}">
+    <div class="card-header text-bg-warning" th:text="#{admin.suspicious}">Suspicious activity (24h)</div>
+    <ul class="list-group list-group-flush"><li class="list-group-item" th:each="s : ${suspicious}">
+      <strong th:text="${s.name}">N</strong> <span class="text-muted" th:text="${s.email}">e</span> · <span th:text="#{admin.rejections(${s.n})}">5 rejections</span></li></ul>
+  </div>
+  <div class="card"><div class="table-responsive"><table class="table table-sm align-middle mb-0">
+    <thead class="table-light"><tr><th th:text="#{col.when}">When</th><th th:text="#{col.actor}">Actor</th><th th:text="#{col.action}">Action</th><th th:text="#{nav.a_hotels}">Hotel</th><th th:text="#{col.entity}">Entity</th><th th:text="#{col.details}">Details</th></tr></thead>
+    <tbody>
+      <tr th:if="${#lists.isEmpty(rows)}"><td colspan="6" class="text-center text-muted py-4" th:text="#{table.empty}">Nothing</td></tr>
+      <tr th:each="r : ${rows}"><td class="text-nowrap" th:text="${r.time_at}">t</td><td th:text="${r.actor}">a</td><td th:text="${r.action}">x</td><td th:text="${r.hotel}">h</td><td th:text="${r.entity}">e</td><td class="text-break" th:text="${r.details}">d</td></tr>
+    </tbody></table></div></div>
+  <div class="d-flex gap-2 mt-3">
+    <a class="btn btn-outline-secondary btn-sm" th:classappend="${page == 0} ? 'disabled'" th:href="@{/admin/audit(page=${page - 1})}" th:text="#{table.prev}">Prev</a>
+    <a class="btn btn-outline-secondary btn-sm" th:href="@{/admin/audit(page=${page + 1})}" th:text="#{table.next}">Next</a>
+  </div>
+</section>
+</body>
+</html>

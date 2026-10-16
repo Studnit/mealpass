@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{dash.admin.title}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-3" th:text="#{dash.admin.title}">Super Admin Dashboard</h1>
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{admin.hotels.total}, ${totalHotels}, 'buildings')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{admin.hotels.active}, ${activeHotels}, 'check2-circle')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{admin.hotels.pending}, ${pendingHotels}, 'hourglass-split')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{admin.hotels.suspended}, ${suspendedHotels}, 'slash-circle')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{admin.customers}, ${totalCustomers}, 'people')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{dash.active.subscribers}, ${activeSubscriptions}, 'card-checklist')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{admin.tx.paid}, ${paidTransactions}, 'cash-coin')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{admin.tx.pending}, ${pendingPayments}, 'hourglass')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{dash.revenue}, ${@fmt.money(totalRevenue)}, 'currency-rupee')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{admin.meals.24h}, ${mealsToday}, 'egg-fried')}"></div></div>
+  </div>
+  <a class="btn btn-brand" th:href="@{/admin/hotels(status=PENDING)}"><i class="bi bi-check2-square"></i> <span th:text="#{admin.review.pending}">Review pending hotels</span></a>
+</section>
+</body>
+</html>

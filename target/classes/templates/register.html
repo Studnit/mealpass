@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/layout :: head(#{register.title})}"></head>
+<body class="auth-bg">
+<nav th:replace="~{fragments/layout :: topbar}"></nav>
+<main class="container py-5" style="max-width: 520px;">
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <h1 class="h4 mb-4" th:text="#{register.title}">Create account</h1>
+
+      <div class="alert alert-danger" th:if="${errorKey}" th:text="#{${errorKey}}" role="alert"></div>
+
+      <form th:action="@{/register}" th:object="${form}" method="post" novalidate>
+        <div class="mb-3">
+          <label for="fullName" class="form-label" th:text="#{register.fullName}">Full name</label>
+          <input id="fullName" th:field="*{fullName}" class="form-control" th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'" required>
+          <div class="invalid-feedback" th:errors="*{fullName}"></div>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label" th:text="#{login.email}">Email</label>
+          <input id="email" type="email" th:field="*{email}" class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" required>
+          <div class="invalid-feedback" th:errors="*{email}"></div>
+        </div>
+        <div class="mb-3">
+          <label for="phone" class="form-label" th:text="#{register.phone}">Phone</label>
+          <input id="phone" th:field="*{phone}" class="form-control" th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'">
+          <div class="invalid-feedback" th:errors="*{phone}"></div>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label" th:text="#{login.password}">Password</label>
+          <input id="password" type="password" th:field="*{password}" class="form-control" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" minlength="8" required autocomplete="new-password">
+          <div class="invalid-feedback" th:errors="*{password}"></div>
+        </div>
+        <div class="mb-3">
+          <label for="accountType" class="form-label" th:text="#{register.accountType}">I am a</label>
+          <select id="accountType" th:field="*{accountType}" class="form-select">
+            <option value="CUSTOMER" th:text="#{register.customer}">Customer</option>
+            <option value="OWNER" th:text="#{register.owner}">Hotel owner</option>
+          </select>
+        </div>
+        <div class="mb-3" id="hotelNameGroup" style="display:none">
+          <label for="hotelName" class="form-label" th:text="#{register.hotelName}">Hotel name</label>
+          <input id="hotelName" th:field="*{hotelName}" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-brand w-100" th:text="#{register.submit}">Register</button>
+      </form>
+      <p class="text-center mt-3 mb-0 small">
+        <span th:text="#{register.haveaccount}">Already registered?</span>
+        <a th:href="@{/login}" th:text="#{login.title}">Sign in</a>
+      </p>
+    </div>
+  </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+  (function () {
+    var type = document.getElementById('accountType');
+    var group = document.getElementById('hotelNameGroup');
+    function sync() { group.style.display = type.value === 'OWNER' ? 'block' : 'none'; }
+    type.addEventListener('change', sync);
+    sync();
+  })();
+</script>
+</body>
+</html>

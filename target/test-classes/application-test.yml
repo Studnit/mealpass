@@ -1,0 +1,15 @@
+spring:
+  thymeleaf:
+    cache: false
+  jpa:
+    show-sql: false
+app:
+  bootstrap:
+    admin-email: admin@test.local
+    admin-password: TestAdmin#2026
+  security:
+    qr-secret: test-secret-test-secret-123456
+  payment:
+    webhook-secret: webhook-test-secret-123456
+    provider: testpay
+  upload-dir: target/test-uploads

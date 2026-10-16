@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.hotels}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-3" th:text="#{nav.hotels}">Find hotels</h1>
+  <form method="get" th:action="@{/customer/hotels}" class="input-group mb-3" data-multi>
+    <input class="form-control" name="q" th:value="${q}" maxlength="100" th:placeholder="#{table.search}" th:attr="aria-label=#{table.search}">
+    <button class="btn btn-brand" type="submit"><i class="bi bi-search"></i> <span class="visually-hidden" th:text="#{table.search}">Search</span></button>
+  </form>
+  <div class="text-center text-muted py-5" th:if="${#lists.isEmpty(hotels)}"><i class="bi bi-inbox fs-1 d-block"></i><span th:text="#{table.empty}">Nothing</span></div>
+  <div class="row g-3">
+    <div class="col-12 col-md-6 col-xl-4" th:each="h : ${hotels}">
+      <a class="card card-body h-100 text-decoration-none text-reset" th:href="@{/customer/hotels/{id}(id=${h.id})}">
+        <div class="d-flex gap-3 align-items-center">
+          <span th:replace="~{fragments/ui :: logo(${h.id}, ${h.has_logo}, 56)}"></span>
+          <div><h2 class="h6 m-0" th:text="${h.name}">Hotel</h2>
+            <small class="text-muted d-block" th:text="${h.address}">Address</small>
+            <small class="text-muted" th:text="${h.hours}">Hours</small></div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+</body>
+</html>

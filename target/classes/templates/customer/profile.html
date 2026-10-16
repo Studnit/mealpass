@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.profile}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-3" th:text="#{nav.profile}">Profile</h1>
+  <form class="card card-body mx-auto" style="max-width: 520px;" method="post" th:action="@{/customer/profile}">
+    <div class="mb-3"><label class="form-label" for="fn" th:text="#{register.fullName}">Full name</label>
+      <input class="form-control" id="fn" name="fullName" required maxlength="150" th:value="${user.fullName}"></div>
+    <div class="mb-3"><label class="form-label" for="em" th:text="#{login.email}">Email</label>
+      <input class="form-control" id="em" th:value="${user.email}" disabled></div>
+    <div class="mb-3"><label class="form-label" for="ph" th:text="#{register.phone}">Phone</label>
+      <input class="form-control" id="ph" name="phone" maxlength="20" th:value="${user.phone}"></div>
+    <div class="mb-3"><label class="form-label" for="lg" th:text="#{nav.language}">Language</label>
+      <select class="form-select" id="lg" name="language">
+        <option value="en" th:selected="${user.preferredLanguage == 'en'}" th:text="#{lang.en}">English</option>
+        <option value="mr" th:selected="${user.preferredLanguage == 'mr'}" th:text="#{lang.mr}">Marathi</option>
+        <option value="hi" th:selected="${user.preferredLanguage == 'hi'}" th:text="#{lang.hi}">Hindi</option>
+      </select></div>
+    <button class="btn btn-brand" type="submit" th:text="#{action.save}">Save</button>
+  </form>
+</section>
+</body>
+</html>

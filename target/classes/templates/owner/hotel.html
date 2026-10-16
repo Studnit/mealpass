@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.hotel}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-3" th:text="#{nav.hotel}">Hotel</h1>
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <form class="card card-body" method="post" th:action="@{/owner/hotel}">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <span th:replace="~{fragments/ui :: logo(${hotel.id}, ${hotel.logoPath != null}, 64)}"></span>
+          <span th:replace="~{fragments/ui :: badge(${hotel.status})}"></span>
+        </div>
+        <div class="mb-3"><label class="form-label" for="name" th:text="#{hotel.name}">Name</label>
+          <input class="form-control" id="name" name="name" required maxlength="150" th:value="${hotel.name}"></div>
+        <div class="mb-3"><label class="form-label" for="address" th:text="#{hotel.address}">Address</label>
+          <input class="form-control" id="address" name="address" maxlength="300" th:value="${hotel.address}"></div>
+        <div class="row">
+          <div class="col-md-6 mb-3"><label class="form-label" for="phone" th:text="#{register.phone}">Phone</label>
+            <input class="form-control" id="phone" name="phone" maxlength="20" th:value="${hotel.phone}"></div>
+          <div class="col-md-6 mb-3"><label class="form-label" for="oh" th:text="#{hotel.hours}">Operating hours</label>
+            <input class="form-control" id="oh" name="operatingHours" maxlength="100" th:value="${hotel.operatingHours}" placeholder="07:00 - 22:00"></div>
+        </div>
+        <div class="mb-3"><label class="form-label" for="tz" th:text="#{hotel.timezone}">Timezone</label>
+          <input class="form-control" id="tz" name="timezone" list="tzlist" required th:value="${hotel.timezone}">
+          <datalist id="tzlist"><option th:each="z : ${zones}" th:value="${z}"></option></datalist>
+          <div class="form-text" th:text="#{hotel.timezone.help}">All meal dates use this timezone.</div></div>
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" role="switch" id="ew" name="enforceMealWindow" value="true" th:checked="${hotel.enforceMealWindow}">
+          <label class="form-check-label" for="ew" th:text="#{hotel.enforce.window}">Only allow redemption within the slot time window</label>
+        </div>
+        <div class="mb-3"><label class="form-label" for="lt" th:text="#{hotel.low.threshold}">Low token alert at</label>
+          <input class="form-control" type="number" min="0" max="100" id="lt" name="lowTokenThreshold" th:value="${hotel.lowTokenThreshold}"></div>
+        <button class="btn btn-brand" type="submit" th:text="#{action.save}">Save</button>
+      </form>
+
+      <form class="card card-body mt-3" method="post" th:action="@{/owner/hotel/logo}" enctype="multipart/form-data">
+        <label class="form-label" for="logo" th:text="#{hotel.logo}">Logo (PNG or JPG, max 1 MB)</label>
+        <div class="input-group">
+          <input class="form-control" type="file" id="logo" name="file" accept="image/png,image/jpeg" required>
+          <button class="btn btn-outline-secondary" type="submit" th:text="#{action.upload}">Upload</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="card">
+        <div class="card-header" th:text="#{hotel.slots}">Meal slots</div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item" th:each="s : ${slots}">
+            <form method="post" th:action="@{/owner/hotel/slots}" class="row g-2 align-items-end">
+              <input type="hidden" name="slotId" th:value="${s.id}">
+              <div class="col-12"><input class="form-control form-control-sm" name="name" required maxlength="60" th:value="${s.name}" th:attr="aria-label=#{hotel.slot.name}"></div>
+              <div class="col-4"><input class="form-control form-control-sm" type="time" name="start" required th:value="${#temporals.format(s.startTime, 'HH:mm')}" th:attr="aria-label=#{hotel.slot.start}"></div>
+              <div class="col-4"><input class="form-control form-control-sm" type="time" name="end" required th:value="${#temporals.format(s.endTime, 'HH:mm')}" th:attr="aria-label=#{hotel.slot.end}"></div>
+              <div class="col-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="active" value="true" th:id="'sa' + ${s.id}" th:checked="${s.active}">
+                <label class="form-check-label" th:for="'sa' + ${s.id}" th:text="#{plan.active}">Active</label></div></div>
+              <div class="col-12"><button class="btn btn-sm btn-outline-primary" type="submit" th:text="#{action.save}">Save</button></div>
+            </form>
+          </li>
+          <li class="list-group-item bg-light">
+            <form method="post" th:action="@{/owner/hotel/slots}" class="row g-2 align-items-end">
+              <div class="col-6"><input class="form-control form-control-sm" name="code" required maxlength="20" pattern="[A-Za-z0-9_]{1,20}" th:placeholder="#{hotel.slot.code}" th:attr="aria-label=#{hotel.slot.code}"></div>
+              <div class="col-6"><input class="form-control form-control-sm" name="name" required maxlength="60" th:placeholder="#{hotel.slot.name}" th:attr="aria-label=#{hotel.slot.name}"></div>
+              <div class="col-4"><input class="form-control form-control-sm" type="time" name="start" required th:attr="aria-label=#{hotel.slot.start}"></div>
+              <div class="col-4"><input class="form-control form-control-sm" type="time" name="end" required th:attr="aria-label=#{hotel.slot.end}"></div>
+              <input type="hidden" name="active" value="true">
+              <div class="col-4"><button class="btn btn-sm btn-brand w-100" type="submit" th:text="#{action.add}">Add</button></div>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

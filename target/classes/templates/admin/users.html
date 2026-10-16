@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.a_users}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-3" th:text="#{nav.a_users}">Users</h1>
+  <form method="get" th:action="@{/admin/users}" class="d-flex gap-2 mb-3" data-multi>
+    <input class="form-control" name="q" th:value="${q}" maxlength="100" th:placeholder="#{table.search}" th:attr="aria-label=#{table.search}">
+    <button class="btn btn-outline-secondary" type="submit" th:text="#{table.apply}">Apply</button>
+  </form>
+  <div class="card"><div class="table-responsive"><table class="table align-middle mb-0">
+    <thead class="table-light"><tr><th>ID</th><th th:text="#{col.customer}">Name</th><th>Email</th><th th:text="#{admin.roles}">Roles</th><th th:text="#{col.status}">Status</th><th></th></tr></thead>
+    <tbody>
+      <tr th:if="${#lists.isEmpty(users)}"><td colspan="6" class="text-center text-muted py-4" th:text="#{table.empty}">Nothing</td></tr>
+      <tr th:each="u : ${users}">
+        <td th:text="${u.id}">1</td><td th:text="${u.name}">N</td><td th:text="${u.email}">E</td><td th:text="${u.roles}">R</td>
+        <td><span th:replace="~{fragments/ui :: badge(${u.status})}"></span></td>
+        <td th:if="${!#strings.contains(u.roles, 'SUPER_ADMIN') and u.id != me.id}">
+          <form method="post" th:action="@{/admin/users/{id}/status(id=${u.id})}" th:attr="data-confirm=#{confirm.user.status}">
+            <input type="hidden" name="status" th:value="${u.status == 'ACTIVE'} ? 'SUSPENDED' : 'ACTIVE'">
+            <button class="btn btn-sm" th:classappend="${u.status == 'ACTIVE'} ? 'btn-outline-warning' : 'btn-outline-success'" type="submit"
+                    th:text="${u.status == 'ACTIVE'} ? #{action.suspend} : #{action.activate}">Toggle</button></form></td>
+        <td th:unless="${!#strings.contains(u.roles, 'SUPER_ADMIN') and u.id != me.id}"></td>
+      </tr>
+    </tbody></table></div></div>
+</section>
+</body>
+</html>

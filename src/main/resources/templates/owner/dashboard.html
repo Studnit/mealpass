@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.dashboard}, ${section}, ~{::section})}">
+<body>
+<section>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+      <h1 class="h4 m-0" th:text="${hotel.name}">Hotel</h1>
+      <span th:replace="~{fragments/ui :: badge(${hotel.status})}"></span>
+    </div>
+    <div class="d-flex flex-wrap gap-2 no-print">
+      <a class="btn btn-brand" th:href="@{/owner/verify}"><i class="bi bi-person-check"></i> <span th:text="#{nav.verify}">Verify</span></a>
+      <a class="btn btn-outline-secondary" th:href="@{/owner/requests}"><i class="bi bi-inbox"></i> <span th:text="#{nav.requests}">Requests</span></a>
+      <a class="btn btn-outline-secondary" th:href="@{/owner/qr}"><i class="bi bi-qr-code"></i> <span th:text="#{nav.qr}">QR</span></a>
+    </div>
+  </div>
+
+  <div th:if="${hotel.status == 'PENDING'}" class="alert alert-warning" th:text="#{owner.pending}">Awaiting approval.</div>
+  <div th:if="${hotel.status == 'SUSPENDED' or hotel.status == 'DEACTIVATED'}" class="alert alert-danger" th:text="#{owner.suspended}">Suspended.</div>
+
+  <form method="get" th:action="@{/owner/dashboard}" class="row g-2 align-items-end mb-3 no-print" data-multi>
+    <div class="col-6 col-md-3"><label class="form-label" for="from" th:text="#{table.from}">From</label>
+      <input class="form-control" type="date" id="from" name="from" th:value="${from}"></div>
+    <div class="col-6 col-md-3"><label class="form-label" for="to" th:text="#{table.to}">To</label>
+      <input class="form-control" type="date" id="to" name="to" th:value="${to}"></div>
+    <div class="col-12 col-md-2 d-grid"><button class="btn btn-brand" type="submit" th:text="#{table.apply}">Apply</button></div>
+  </form>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{dash.today.total}, ${todayTotal}, 'egg-fried')}"></div></div>
+    <div class="col-6 col-lg-3" th:each="s : ${todaySlots}"><div th:replace="~{fragments/ui :: stat(${s.name}, ${s.n}, 'cup-hot')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{dash.active.subscribers}, ${activeSubscribers}, 'people')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{dash.pending.requests}, ${pendingRequests + pendingPayments}, 'inbox')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{dash.expiring.soon}, ${expiringSoon}, 'hourglass-split')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{dash.low.tokens}, ${lowTokens}, 'exclamation-triangle')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{dash.tokens.today}, ${tokensToday}, 'coin')}"></div></div>
+    <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{dash.revenue}, ${@fmt.money(revenue)}, 'currency-rupee')}"></div></div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-lg-6"><div class="card h-100"><div class="card-body">
+      <h2 class="h6" th:text="#{chart.daily}">Daily redemptions</h2><div class="chart-box"><canvas id="chDaily" role="img" th:attr="aria-label=#{chart.daily}"></canvas></div></div></div></div>
+    <div class="col-12 col-lg-6"><div class="card h-100"><div class="card-body">
+      <h2 class="h6" th:text="#{chart.weekly}">Weekly token usage</h2><div class="chart-box"><canvas id="chWeekly" role="img" th:attr="aria-label=#{chart.weekly}"></canvas></div></div></div></div>
+    <div class="col-12 col-lg-6"><div class="card h-100"><div class="card-body">
+      <h2 class="h6" th:text="#{chart.revenue}">Revenue</h2><div class="chart-box"><canvas id="chRevenue" role="img" th:attr="aria-label=#{chart.revenue}"></canvas></div></div></div></div>
+    <div class="col-12 col-lg-6"><div class="card h-100"><div class="card-body">
+      <h2 class="h6" th:text="#{chart.newrenew}">New vs renewed</h2><div class="chart-box"><canvas id="chNewRenew" role="img" th:attr="aria-label=#{chart.newrenew}"></canvas></div></div></div></div>
+    <div class="col-12 col-lg-6"><div class="card h-100"><div class="card-body">
+      <h2 class="h6" th:text="#{chart.slots}">Popular meal slots</h2><div class="chart-box"><canvas id="chSlots" role="img" th:attr="aria-label=#{chart.slots}"></canvas></div></div></div></div>
+    <div class="col-12 col-lg-6"><div class="card h-100"><div class="card-body">
+      <h2 class="h6" th:text="#{chart.status}">Subscription status</h2><div class="chart-box"><canvas id="chStatus" role="img" th:attr="aria-label=#{chart.status}"></canvas></div></div></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" th:text="#{dash.recent}">Recent attendance</div>
+    <div class="table-responsive"><table class="table mb-0 align-middle">
+      <thead class="table-light"><tr><th th:text="#{col.customer}">Customer</th><th th:text="#{col.meal}">Meal</th><th th:text="#{col.time}">Time</th><th th:text="#{col.ref}">Ref</th><th th:text="#{col.status}">Status</th></tr></thead>
+      <tbody>
+        <tr th:if="${#lists.isEmpty(recent)}"><td colspan="5" class="text-center text-muted py-4" th:text="#{table.empty}">Nothing</td></tr>
+        <tr th:each="r : ${recent}">
+          <td th:text="${r.customer}">C</td><td th:text="${r.meal}">M</td><td th:text="${r.time_at}">T</td><td th:text="${r.ref}">R</td>
+          <td><span th:replace="~{fragments/ui :: badge(${r.status})}"></span></td>
+        </tr>
+      </tbody></table></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script th:inline="javascript">
+    (function () {
+      var charts = /*[[${charts}]]*/ {};
+      var statusNames = {
+        PENDING: /*[[#{status.PENDING}]]*/ 'Pending', ACTIVE: /*[[#{status.ACTIVE}]]*/ 'Active', EXPIRED: /*[[#{status.EXPIRED}]]*/ 'Expired',
+        SUSPENDED: /*[[#{status.SUSPENDED}]]*/ 'Suspended', CANCELLED: /*[[#{status.CANCELLED}]]*/ 'Cancelled', EXHAUSTED: /*[[#{status.EXHAUSTED}]]*/ 'Exhausted' };
+      var names = { newer: /*[[#{status.NEW}]]*/ 'New', renewed: /*[[#{status.RENEWAL}]]*/ 'Renewal' };
+      var palette = ['#b45309', '#0f766e', '#1d4ed8', '#be123c', '#6d28d9', '#4d7c0f'];
+      function make(id, type, labels, datasets, extra) {
+        var el = document.getElementById(id);
+        if (!el || !window.Chart) return;
+        new Chart(el, { type: type, data: { labels: labels, datasets: datasets },
+          options: Object.assign({ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: datasets.length > 1 || type === 'doughnut' } },
+            scales: type === 'doughnut' ? {} : { y: { beginAtZero: true, ticks: { precision: 0 } } } }, extra || {}) });
+      }
+      make('chDaily', 'bar', charts.daily.labels, [{ data: charts.daily.values, backgroundColor: palette[0] }]);
+      make('chWeekly', 'line', charts.weekly.labels, [{ data: charts.weekly.values, borderColor: palette[1], backgroundColor: palette[1], tension: .3 }]);
+      make('chRevenue', 'line', charts.revenue.labels, [{ data: charts.revenue.values, borderColor: palette[2], backgroundColor: palette[2], tension: .3 }]);
+      make('chNewRenew', 'bar', charts.newVsRenewed.labels, [
+        { label: names.newer, data: charts.newVsRenewed.newer, backgroundColor: palette[0] },
+        { label: names.renewed, data: charts.newVsRenewed.renewed, backgroundColor: palette[1] }]);
+      make('chSlots', 'doughnut', charts.slots.labels, [{ data: charts.slots.values, backgroundColor: palette }]);
+      make('chStatus', 'doughnut', charts.status.labels.map(function (s) { return statusNames[s] || s; }),
+           [{ data: charts.status.values, backgroundColor: palette }]);
+    })();
+  </script>
+</section>
+</body>
+</html>

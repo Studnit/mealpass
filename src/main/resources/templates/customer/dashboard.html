@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{dash.customer.title}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-1" th:text="#{customer.greeting(${me.fullName})}">Hello</h1>
+  <p class="text-muted" th:text="#{customer.subtitle}">Your meals and tokens at a glance.</p>
+
+  <div class="card card-body text-center py-5" th:if="${#lists.isEmpty(subs)}">
+    <i class="bi bi-emoji-smile display-4 text-brand"></i>
+    <p class="lead mt-2" th:text="#{customer.nosubs}">You have no subscriptions yet.</p>
+    <div><a class="btn btn-brand btn-lg" th:href="@{/customer/hotels}"><i class="bi bi-search"></i> <span th:text="#{nav.hotels}">Find hotels</span></a></div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-lg-6" th:each="s : ${subs}">
+      <div th:replace="~{customer/sub-card :: card(${s}, true)}"></div>
+    </div>
+  </div>
+
+  <div class="card" th:if="${!#lists.isEmpty(recent)}">
+    <div class="card-header d-flex justify-content-between"><span th:text="#{dash.recent}">Recent</span>
+      <a th:href="@{/customer/table/my_attendance}" th:text="#{customer.viewall}">View all</a></div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item d-flex justify-content-between align-items-center" th:each="r : ${recent}">
+        <span><strong th:text="${r.meal}">Lunch</strong> · <span th:text="${r.hotel}">Hotel</span><br>
+          <small class="text-muted" th:text="${@fmt.date(r.day)} + ' ' + ${r.time_at} + ' · ' + ${r.ref}">date</small></span>
+        <span th:replace="~{fragments/ui :: badge(${r.status})}"></span>
+      </li>
+    </ul>
+  </div>
+</section>
+</body>
+</html>

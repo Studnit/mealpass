@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.a_settings}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-3" th:text="#{nav.a_settings}">Platform settings</h1>
+  <p class="text-muted" th:text="#{admin.settings.help}">Key/value platform configuration, stored in the database and audited.</p>
+  <div class="card mb-4"><ul class="list-group list-group-flush">
+    <li class="list-group-item text-muted" th:if="${#lists.isEmpty(settings)}" th:text="#{table.empty}">Nothing</li>
+    <li class="list-group-item d-flex justify-content-between" th:each="s : ${settings}"><code th:text="${s.key}">k</code><span th:text="${s.value}">v</span></li>
+  </ul></div>
+  <form class="card card-body" method="post" th:action="@{/admin/settings}">
+    <div class="row g-2">
+      <div class="col-md-5"><label class="form-label" for="sk" th:text="#{admin.setting.key}">Key</label><input class="form-control" id="sk" name="key" required pattern="[a-z0-9_.]{1,80}" maxlength="80"></div>
+      <div class="col-md-5"><label class="form-label" for="sv" th:text="#{admin.setting.value}">Value</label><input class="form-control" id="sv" name="value" required maxlength="500"></div>
+      <div class="col-md-2 d-grid align-items-end"><button class="btn btn-brand" type="submit" th:text="#{action.save}">Save</button></div>
+    </div>
+  </form>
+</section>
+</body>
+</html>

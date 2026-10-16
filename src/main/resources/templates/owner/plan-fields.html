@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+  <th:block th:fragment="fields(p, id)">
+    <div class="mb-2"><label class="form-label" th:for="${id} + 'n'" th:text="#{plan.name}">Name</label>
+      <input class="form-control" th:id="${id} + 'n'" name="planName" required maxlength="100" th:value="${p?.planName}"></div>
+    <div class="row g-2">
+      <div class="col-6"><label class="form-label" th:for="${id} + 'm'" th:text="#{plan.meals}">Meals per day</label>
+        <input class="form-control" type="number" min="1" max="4" required th:id="${id} + 'm'" name="mealsPerDay" th:value="${p?.mealsPerDay ?: 1}"></div>
+      <div class="col-6"><label class="form-label" th:for="${id} + 't'" th:text="#{plan.tokens}">Tokens</label>
+        <input class="form-control" type="number" min="1" max="1000" required th:id="${id} + 't'" name="totalTokens" th:value="${p?.totalTokens ?: 30}"></div>
+      <div class="col-6"><label class="form-label" th:for="${id} + 'pr'" th:text="#{plan.price}">Price</label>
+        <input class="form-control" type="number" min="0" step="0.01" required th:id="${id} + 'pr'" name="price" th:value="${p?.price ?: 0}"></div>
+      <div class="col-6"><label class="form-label" th:for="${id} + 'v'" th:text="#{plan.validity}">Validity (days)</label>
+        <input class="form-control" type="number" min="1" max="730" required th:id="${id} + 'v'" name="validityDays" th:value="${p?.validityDays ?: 30}"></div>
+    </div>
+    <div class="form-check mt-2"><input class="form-check-input" type="checkbox" name="tokensExpire" value="true" th:id="${id} + 'e'" th:checked="${p == null or p.tokensExpireWithSubscription}">
+      <label class="form-check-label" th:for="${id} + 'e'" th:text="#{plan.tokens.expire}">Unused tokens expire with the subscription</label></div>
+    <div class="form-check"><input class="form-check-input" type="checkbox" name="active" value="true" th:id="${id} + 'a'" th:checked="${p != null and p.active}">
+      <label class="form-check-label" th:for="${id} + 'a'" th:text="#{plan.active}">Active (visible to customers)</label></div>
+  </th:block>
+</body>
+</html>

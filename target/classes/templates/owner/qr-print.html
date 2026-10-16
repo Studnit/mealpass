@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${hotel.name} + ' · QR'">QR</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+  <style>body{font-family:"Noto Sans","Noto Sans Devanagari",sans-serif} .sheet{max-width:560px;margin:2rem auto;text-align:center;border:3px solid #000;border-radius:1rem;padding:2rem}
+    .sheet img.qr{width:100%;max-width:420px;image-rendering:pixelated}</style>
+</head>
+<body>
+<div class="sheet">
+  <img th:if="${hotel.logoPath != null}" th:src="@{/hotel-logo/{i}(i=${hotel.id})}" alt="" width="96" height="96" class="mb-2 rounded">
+  <h1 class="h2" th:text="${hotel.name}">Hotel</h1>
+  <p class="lead" th:text="#{qr.print.title}">Scan to redeem your meal</p>
+  <img class="qr" th:if="${qr != null}" th:src="@{/owner/qr/image.png}" th:alt="#{qr.alt(${hotel.name})}">
+  <p class="mt-3 mb-0" th:text="#{qr.print.steps}">1. Open the app and sign in. 2. Scan. 3. Confirm your meal.</p>
+  <button class="btn btn-dark mt-3 d-print-none" onclick="window.print()" th:text="#{qr.print}">Print</button>
+</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- coloured status label; the text is looked up as status.<VALUE> -->
+<span th:fragment="badge(s)" th:if="${s != null and s != ''}" class="badge"
+      th:classappend="${#strings.contains('ACTIVE,SUCCESS,SERVED,APPROVED,CREDIT,NEW', s)} ? 'text-bg-success'
+        : (${#strings.contains('PENDING,UNSET,RENEWAL', s)} ? 'text-bg-warning'
+        : (${#strings.contains('EXPIRED,FAILED,CANCELLED,REJECTED,REVERSED,REVERSAL,SUSPENDED,DEACTIVATED,EXHAUSTED', s)} ? 'text-bg-danger'
+        : 'text-bg-secondary'))"
+      th:text="#{${'status.' + s}}">STATUS</span>
+
+<!-- statistic tile -->
+<div th:fragment="stat(label, value, icon)" class="card stat h-100">
+  <div class="card-body d-flex align-items-center gap-3">
+    <div class="stat-icon"><i th:class="'bi bi-' + ${icon}" aria-hidden="true"></i></div>
+    <div>
+      <div class="stat-label" th:text="${label}">Label</div>
+      <div class="stat-value" th:text="${value}">0</div>
+    </div>
+  </div>
+</div>
+
+<!-- hotel logo or placeholder -->
+<span th:fragment="logo(id, has, size)" class="hotel-logo" th:style="'width:' + ${size} + 'px;height:' + ${size} + 'px'">
+  <img th:if="${has}" th:src="@{/hotel-logo/{i}(i=${id})}" alt="" width="64" height="64">
+  <i th:unless="${has}" class="bi bi-building" aria-hidden="true"></i>
+</span>
+
+</body>
+</html>

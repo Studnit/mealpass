@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.qr}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-3" th:text="#{nav.qr}">QR code</h1>
+  <div class="row g-3">
+    <div class="col-12 col-md-6">
+      <div class="card card-body text-center">
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+          <span th:replace="~{fragments/ui :: logo(${hotel.id}, ${hotel.logoPath != null}, 48)}"></span>
+          <h2 class="h5 m-0" th:text="${hotel.name}">Hotel</h2>
+        </div>
+        <div th:if="${qr != null}">
+          <img class="qr-img" th:src="@{/owner/qr/image.png}" th:alt="#{qr.alt(${hotel.name})}">
+          <p class="small text-muted mt-2 text-break" th:text="${qrUrl}">url</p>
+          <div class="d-flex flex-wrap justify-content-center gap-2 no-print">
+            <a class="btn btn-outline-secondary" th:href="@{/owner/qr/image.png(download=true)}"><i class="bi bi-download"></i> <span th:text="#{qr.download}">Download</span></a>
+            <a class="btn btn-outline-secondary" th:href="@{/owner/qr/print}" target="_blank" rel="noopener"><i class="bi bi-printer"></i> <span th:text="#{qr.print}">Print</span></a>
+          </div>
+        </div>
+        <div th:unless="${qr != null}" class="alert alert-warning mb-0" th:text="#{qr.none}">No active QR code.</div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6">
+      <div class="card card-body">
+        <p th:text="#{qr.help}">Customers scan this code, sign in, and confirm the meal. The code holds no personal data.</p>
+        <form method="post" th:action="@{/owner/qr/rotate}" th:attr="data-confirm=#{confirm.qr.rotate}" class="mb-2">
+          <button class="btn btn-brand" type="submit"><i class="bi bi-arrow-repeat"></i> <span th:text="#{qr.rotate}">Rotate</span></button>
+        </form>
+        <form method="post" th:action="@{/owner/qr/deactivate}" th:attr="data-confirm=#{confirm.qr.deactivate}" th:if="${qr != null}">
+          <button class="btn btn-outline-danger" type="submit"><i class="bi bi-slash-circle"></i> <span th:text="#{qr.deactivate}">Deactivate</span></button>
+        </form>
+        <p class="small text-muted mt-3 mb-0" th:text="#{qr.rotate.help}">Rotating immediately invalidates old printouts.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

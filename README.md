@@ -1,0 +1,95 @@
+# Hotel Meal Subscription & QR Token Management System
+
+Spring Boot 3.3 · Java 17 · Thymeleaf · PostgreSQL 16 · Flyway · Bootstrap 5 · ZXing
+
+Hotels sell meal-token subscriptions (e.g. Plan A: 30 tokens, 1 meal/day; Plan B: 60 tokens, 2 meals/day).
+A customer scans the hotel's QR code, signs in, confirms the meal, and exactly one token is deducted.
+Staff can alternatively verify a customer's short-lived pass QR. Four roles: Super Admin, Hotel Owner, Staff, Customer.
+UI languages: English, Marathi, Hindi.
+
+> **Status of verification:** the database migrations were applied to a real PostgreSQL 16 and the message bundles
+> were checked by script. The Java code and templates were written without access to Maven Central, so
+> **they have not been compiled and the test suite has not been run**. Run `mvn verify` first and expect to fix a few
+> compile-level slips.
+
+## Features
+- **Subscriptions:** customer requests a plan, owner approves, a PENDING payment is created, tokens are credited only after
+  payment is confirmed (cash/UPI by owner or permitted staff, or a signed gateway webhook). Free plans auto-activate.
+  Suspend, resume, cancel, extend; hourly expiry job.
+- **Redemption:** one transaction takes a `SELECT ... FOR UPDATE` row lock on the active subscription, then checks expiry, balance, daily limit,
+  duplicate slot and idempotency key, and writes attendance + deduction + ledger entry + audit log + notifications.
+  Owner reversal refunds the token through a REVERSAL ledger row (never an update of history).
+- **Integrity in the database:** CHECK constraints (no negative tokens, used + remaining = total), partial unique indexes
+  (one served attendance per subscription/date/slot, one active subscription per customer+hotel, one active QR per hotel, one reversal per reference),
+  and triggers making `token_transactions` and `audit_logs` append-only.
+- **Tenant isolation:** the hotel is derived server-side from the logged-in user, never from request parameters; other hotels' rows return "not found".
+- **Reports** (filter, search, sort, paginate, CSV export with spreadsheet-formula protection), dashboards with charts, notifications, audit logs.
+- **Security:** BCrypt, CSRF on every form, session-fixation protection, login/redemption rate limiting, non-guessable QR identifiers (256-bit random),
+  HMAC-signed 5-minute customer passes, signed payment webhooks, secure cookie flags.
+
+## Requirements
+Java 17, Maven 3.9+, PostgreSQL 14+ (16 recommended). Docker is optional (for Compose and for Testcontainers in tests).
+
+## Run locally
+1. Create the database:
+   ```sql
+   CREATE USER mealtoken WITH PASSWORD 'mealtoken';
+   CREATE DATABASE mealtoken OWNER mealtoken;
+   ```
+2. Copy `.env.example` values into your environment (see the table below) and start:
+   ```bash
+   mvn spring-boot:run
+   ```
+   Flyway creates the schema on first start; Hibernate only validates it.
+3. Open http://localhost:8080 and sign in as the bootstrap Super Admin (`ADMIN_EMAIL` / `ADMIN_PASSWORD`). Change that password.
+4. Optional demo data (development only): `SEED_DEMO_DATA=true` creates a hotel, staff, customers and subscriptions.
+   Every demo account uses the password `Demo#2026pass`; the addresses are printed in the startup log.
+
+## Configuration
+| Variable | Purpose | Default |
+|---|---|---|
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL | localhost / mealtoken |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Bootstrap Super Admin | change in production |
+| `PUBLIC_BASE_URL` | URL phones can reach; encoded into hotel QR codes | http://localhost:8080 |
+| `QR_SECRET` | HMAC key for customer passes, at least 16 chars. **Must be unique in production** | dev value (logs a warning) |
+| `UPLOAD_DIR` | Hotel logos | `uploads` |
+| `COOKIE_SECURE` | `true` behind HTTPS | false |
+| `THYMELEAF_CACHE` | `true` in production | false |
+| `APP_PAYMENT_WEBHOOK_SECRET`, `APP_PAYMENT_PROVIDER` | Enables `/webhooks/payments` (unset = endpoint returns 404) | unset |
+| `SEED_DEMO_DATA` | Demo data | false |
+
+## Online payment webhook
+`POST /webhooks/payments` with JSON `{"paymentId":123,"status":"SUCCESS","amount":"100.00","reference":"txn-1"}` and header
+`X-Signature: <hex HMAC-SHA256 of the raw body using APP_PAYMENT_WEBHOOK_SECRET>`. Bad signatures get 401; an amount that
+differs from the payment gets 422; replays are harmless. `HmacPaymentGateway` is a generic verifier: implement `PaymentGateway`
+for a specific provider (Razorpay, Stripe, ...) and add its SDK/redirect flow.
+
+## Tests
+```bash
+mvn verify                      # needs Docker: Testcontainers starts PostgreSQL 16
+# or, without Docker, point at any empty-ish PostgreSQL database:
+TEST_DB_URL=jdbc:postgresql://localhost:5432/mt_test TEST_DB_USERNAME=postgres TEST_DB_PASSWORD=secret mvn verify
+```
+Covered: subscription lifecycle and payment gating, expiry (with a controllable clock), redemption (success, exhaustion, duplicate slot,
+Plan A vs Plan B daily limits, cross-hotel rejection, reversal + audit + idempotency), concurrent redemption (parallel threads racing for the last
+token / the same meal), append-only triggers, role-based access, CSRF, receipt and attendance isolation, webhook signatures, i18n completeness,
+pass-token and CSV-escaping unit tests. Integration tests create uniquely named data and do not need a clean database.
+
+## Docker
+```bash
+docker compose up --build        # app on :8080, PostgreSQL volume, uploads volume
+```
+Set `QR_SECRET`, `ADMIN_PASSWORD`, `DB_PASSWORD`, `PUBLIC_BASE_URL` (and `COOKIE_SECURE=true` behind TLS) in a `.env` file first.
+For production put the app behind a TLS-terminating reverse proxy and set `server.forward-headers-strategy=framework` if you need the original scheme/host.
+
+## Operations notes
+- Hotel QR: owner > QR page shows, downloads, prints and rotates it. Rotating revokes the old code immediately.
+- All date logic (daily limit, expiry, "today") uses the **hotel's** time zone.
+- Health: `/actuator/health`.
+- Ledger corrections are new rows (REVERSAL / ADJUSTMENT); the database rejects UPDATE and DELETE on the ledger and audit log.
+
+## Known limitations
+- Owner "Hotel Settings" are merged into the Hotel Profile page; platform settings and audit views are intentionally simple.
+- A customer can renew only when no ACTIVE subscription exists at that hotel.
+- Payment gateway support is a generic signed-webhook verifier, not a provider SDK.
+- Rate limiting is in-memory (per instance); use a shared store if you scale horizontally.

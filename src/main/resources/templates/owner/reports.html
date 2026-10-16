@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.reports}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-3" th:text="#{nav.reports}">Reports</h1>
+  <p class="text-muted" th:text="#{report.help}">Every report supports date range, search, sorting and CSV export (opens in Excel).</p>
+  <div class="row g-3">
+    <div class="col-12 col-md-6 col-xl-4" th:each="d : ${reports}">
+      <a class="card card-body h-100 text-decoration-none" th:href="@{/owner/table/{t}(t=${d.type})}">
+        <h2 class="h6 text-brand m-0"><i class="bi bi-table me-1"></i><span th:text="#{${d.titleKey}}">Report</span></h2>
+      </a>
+    </div>
+  </div>
+</section>
+</body>
+</html>

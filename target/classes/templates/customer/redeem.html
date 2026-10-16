@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{redeem.title}, ${section}, ~{::section})}">
+<body>
+<section>
+  <div class="card card-body mb-3">
+    <div class="d-flex align-items-center gap-3">
+      <span th:replace="~{fragments/ui :: logo(${hotel.id}, ${hotel.logoPath != null}, 64)}"></span>
+      <div><div class="text-muted small" th:text="#{redeem.at}">You are at</div><h1 class="h4 m-0" th:text="${hotel.name}">Hotel</h1></div>
+    </div>
+  </div>
+
+  <div th:if="${sub == null}" class="card card-body text-center">
+    <i class="bi bi-ticket-perforated display-4 text-brand"></i>
+    <p class="lead mt-2" th:text="#{error.sub.none}">No active subscription at this hotel.</p>
+    <div><a class="btn btn-brand" th:href="@{/customer/hotels/{id}(id=${hotel.id})}" th:text="#{redeem.plans}">View plans</a></div>
+  </div>
+
+  <div th:if="${sub != null}">
+    <div class="card card-body mb-3">
+      <div class="row text-center">
+        <div class="col-6"><div class="token-big" th:text="${sub.remaining}">0</div><small class="text-muted" th:text="#{receipt.remaining}">Remaining</small></div>
+        <div class="col-6"><div class="h4 m-0" th:text="${@fmt.date(sub.expiry)}">d</div><small class="text-muted" th:text="#{col.expiry}">Expiry</small></div>
+      </div>
+      <p class="small text-muted text-center mt-2 mb-0" th:text="${sub.planName}">Plan</p>
+    </div>
+
+    <form method="post" th:action="@{/customer/redeem}">
+      <input type="hidden" name="identifier" th:value="${identifier}">
+      <input type="hidden" name="key" th:value="${key}">
+      <h2 class="h6" th:text="#{redeem.choose}">Choose the meal</h2>
+      <p class="small text-muted" th:text="#{redeem.confirm.note}">One token will be used when you confirm.</p>
+      <div class="d-grid gap-2">
+        <button th:each="sl : ${sub.slots}" class="btn btn-brand slot-btn" type="submit" name="slotId" th:value="${sl.id}"
+                th:disabled="${sl.served or !sub.redeemable}">
+          <i class="bi bi-egg-fried me-1"></i><span th:text="${sl.name}">Lunch</span>
+          <small th:text="${#temporals.format(sl.start, 'HH:mm')} + '–' + ${#temporals.format(sl.end, 'HH:mm')}">12:00–15:00</small>
+          <small th:if="${sl.served}" th:text="'· ' + #{redeem.served}">served</small>
+        </button>
+      </div>
+    </form>
+    <p class="text-danger mt-3" th:if="${!sub.redeemable and sub.remaining > 0}" th:text="#{error.daily.limit}">Daily limit reached.</p>
+  </div>
+</section>
+</body>
+</html>

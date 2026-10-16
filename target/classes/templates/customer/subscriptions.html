@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{nav.subscriptions}, ${section}, ~{::section})}">
+<body>
+<section>
+  <h1 class="h4 mb-3" th:text="#{nav.subscriptions}">My subscriptions</h1>
+
+  <div class="card mb-4" th:if="${!#lists.isEmpty(pending)}">
+    <div class="card-header text-bg-warning" th:text="#{sub.payment.due}">Payments due</div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item" th:each="p : ${pending}">
+        <div class="d-flex flex-wrap justify-content-between gap-2">
+          <span><strong th:text="${p.hotel}">Hotel</strong> · <span th:text="${@fmt.money(p.amount)}">0</span></span>
+          <form method="post" th:action="@{/customer/payments/{id}/upi(id=${p.id})}" class="d-flex gap-1">
+            <input class="form-control form-control-sm" name="reference" required maxlength="100" th:value="${p.reference}" th:placeholder="#{sub.upi.ref}" th:attr="aria-label=#{sub.upi.ref}">
+            <button class="btn btn-sm btn-outline-primary" type="submit" th:text="#{sub.upi.submit}">Submit UPI reference</button>
+          </form>
+        </div>
+        <small class="text-muted" th:text="#{sub.payment.help}">Pay at the hotel or by UPI; the hotel confirms the payment.</small>
+      </li>
+    </ul>
+  </div>
+
+  <div class="text-center text-muted py-5" th:if="${#lists.isEmpty(subs)}"><i class="bi bi-inbox fs-1 d-block"></i><span th:text="#{customer.nosubs}">None</span></div>
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-lg-6" th:each="s : ${subs}"><div th:replace="~{customer/sub-card :: card(${s}, false)}"></div></div>
+  </div>
+
+  <div class="card" th:if="${!#lists.isEmpty(requests)}">
+    <div class="card-header" th:text="#{sub.requests}">My requests</div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item d-flex justify-content-between align-items-center" th:each="r : ${requests}">
+        <span><strong th:text="${r.hotel}">Hotel</strong> · <span th:text="${r.plan}">Plan</span></span>
+        <span th:replace="~{fragments/ui :: badge(${r.status})}"></span>
+      </li>
+    </ul>
+  </div>
+</section>
+</body>
+</html>
