@@ -9,14 +9,14 @@
       <form class="card card-body" method="post" th:action="@{/owner/plans}">
         <input type="hidden" name="planId" th:value="${p.id}">
         <div th:replace="~{owner/plan-fields :: fields(${p}, ${'p' + p.id})}"></div>
-        <button class="btn btn-outline-primary mt-3" type="submit" th:text="#{action.save}">Save</button>
+        <div class="form-actions"><button class="btn btn-brand" type="submit"><i class="bi bi-check-lg"></i><span th:text="#{action.save}">Save</span></button></div>
       </form>
     </div>
     <div class="col-12 col-xl-6">
       <form class="card card-body border-brand" method="post" th:action="@{/owner/plans}">
         <h2 class="h6" th:text="#{plan.new}">New plan</h2>
         <div th:replace="~{owner/plan-fields :: fields(null, 'new')}"></div>
-        <button class="btn btn-brand mt-3" type="submit" th:text="#{action.add}">Add</button>
+        <div class="form-actions"><button class="btn btn-brand" type="submit"><i class="bi bi-plus-lg"></i><span th:text="#{action.add}">Add</span></button></div>
       </form>
     </div>
   </div>

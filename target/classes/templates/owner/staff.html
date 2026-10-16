@@ -44,7 +44,7 @@
           <input class="form-control" type="password" id="pw" name="password" required minlength="8" maxlength="72" autocomplete="new-password"></div>
         <div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="cp" name="canConfirmPayments" value="true">
           <label class="form-check-label" for="cp" th:text="#{staff.can.confirm}">Can confirm payments</label></div>
-        <button class="btn btn-brand" type="submit" th:text="#{action.add}">Add</button>
+        <div class="form-actions"><button class="btn btn-brand" type="submit"><i class="bi bi-person-plus"></i><span th:text="#{action.add}">Add</span></button></div>
       </form>
     </div>
   </div>

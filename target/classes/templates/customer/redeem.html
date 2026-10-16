@@ -29,16 +29,17 @@
       <input type="hidden" name="key" th:value="${key}">
       <h2 class="h6" th:text="#{redeem.choose}">Choose the meal</h2>
       <p class="small text-muted" th:text="#{redeem.confirm.note}">One token will be used when you confirm.</p>
-      <p class="small" th:if="${suggested != null}"><i class="bi bi-clock"></i> <span th:text="#{redeem.suggested}">Suggested for this time</span>:
-        <strong th:each="sl : ${sub.slots}" th:if="${sl.code == suggested}" th:text="${sl.name}">Lunch</strong></p>
-      <div class="d-grid gap-2">
-        <button th:each="sl : ${sub.slots}" class="btn slot-btn" th:classappend="${sl.code == suggested} ? 'btn-brand btn-lg' : 'btn-outline-secondary'" type="submit" name="slotId" th:value="${sl.id}"
+      <p th:if="${suggested != null}"><span class="suggest-note"><i class="bi bi-clock"></i> <span th:text="#{redeem.suggested}">Suggested for this time</span>:
+        <strong th:each="sl : ${sub.slots}" th:if="${sl.code == suggested}" th:text="${sl.name}">Lunch</strong></span></p>
+      <div class="slot-grid">
+        <button th:each="sl : ${sub.slots}" class="btn slot-btn" th:classappend="${sl.code == suggested} ? 'btn-brand' : 'btn-outline-secondary'" type="submit" name="slotId" th:value="${sl.id}"
                 th:disabled="${sl.served or !sub.redeemable}">
           <i class="bi bi-egg-fried me-1"></i><span th:text="${sl.name}">Lunch</span>
           <small th:text="${#temporals.format(sl.start, 'HH:mm')} + '–' + ${#temporals.format(sl.end, 'HH:mm')}">12:00–15:00</small>
           <small th:if="${sl.served}" th:text="'· ' + #{redeem.served}">served</small>
         </button>
       </div>
+      <div class="form-actions"><a class="btn btn-outline-secondary" th:href="@{/customer/dashboard}"><i class="bi bi-x-lg"></i><span th:text="#{action.cancel}">Cancel</span></a></div>
     </form>
     <p class="text-danger mt-3" th:if="${!sub.redeemable and sub.remaining > 0}" th:text="#{error.daily.limit}">Daily limit reached.</p>
   </div>

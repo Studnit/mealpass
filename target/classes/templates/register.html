@@ -46,7 +46,7 @@
       </form>
       <p class="text-center mt-3 mb-0 small">
         <span th:text="#{register.haveaccount}">Already registered?</span>
-        <a th:href="@{/login}" th:text="#{login.title}">Sign in</a>
+        <a class="back-link" th:href="@{/login}"><i class="bi bi-arrow-left"></i><span th:text="#{forgot.back}">Back to sign in</span></a>
       </p>
     </div>
   </div>

@@ -53,3 +53,22 @@
   });
   window.addEventListener('appinstalled', function () { btn.classList.add('d-none'); });
 })();
+
+// Back button: shown on every inner page; goes to the previous page of this app, else to the fallback (home).
+(function () {
+  'use strict';
+  var roots = /^\/(home|owner\/dashboard|staff\/dashboard|customer\/dashboard|admin\/dashboard)\/?$/;
+  var bar = document.querySelector('[data-page-bar]');
+  document.querySelectorAll('[data-back]').forEach(function (b) {
+    if (bar && bar.contains(b) && roots.test(location.pathname)) return;     // dashboards have nothing to go back to
+    b.hidden = false;
+    b.addEventListener('click', function (e) {
+      e.preventDefault();
+      var sameSite = document.referrer && document.referrer.indexOf(location.origin) === 0 && document.referrer !== location.href;
+      if (sameSite && history.length > 1) history.back();
+      else location.href = b.getAttribute('data-fallback') || '/home';
+    });
+  });
+})();
+
+document.addEventListener('click', function (e) { if (e.target.closest('[data-print]')) window.print(); });
