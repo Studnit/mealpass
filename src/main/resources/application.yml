@@ -42,7 +42,7 @@ app:
   # Public address of the app (e.g. https://meals.example.com), encoded in hotel QR codes and reset links.
   # Only the QR identifier is stored in the database, so changing this value re-points every QR on restart.
   # Leave empty to use the address of the current request.
-  public-base-url: ${PUBLIC_BASE_URL:}
+  public-base-url: https://mealpass-production.up.railway.app/ #${PUBLIC_BASE_URL:}
   upload-dir: ${UPLOAD_DIR:uploads}
   security:
     # HMAC key for customer pass tokens. MUST be overridden in production (>= 16 chars).
