@@ -67,8 +67,9 @@ public class OwnerController {
                             @RequestParam(required = false) String city, @RequestParam(required = false) String area,
                             @RequestParam(required = false) String phone, @RequestParam(required = false) String operatingHours,
                             @RequestParam String timezone, @RequestParam(defaultValue = "false") boolean enforceMealWindow,
-                            @RequestParam(defaultValue = "5") int lowTokenThreshold, RedirectAttributes ra) {
-        hotelService.updateProfile(access.current(), name, address, city, area, phone, operatingHours, timezone, enforceMealWindow, lowTokenThreshold);
+                            @RequestParam(defaultValue = "5") int lowTokenThreshold,
+                            @RequestParam(defaultValue = "5") int tokenHoldCount, RedirectAttributes ra) {
+        hotelService.updateProfile(access.current(), name, address, city, area, phone, operatingHours, timezone, enforceMealWindow, lowTokenThreshold, tokenHoldCount);
         ra.addFlashAttribute("ok", "ok.saved");
         return "redirect:/owner/hotel";
     }

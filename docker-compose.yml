@@ -22,8 +22,8 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-ChangeMe#2026}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
       OTP_REQUIRED: ${OTP_REQUIRED:-true}
-      # To send codes by email / SMS add (see .env.example): SPRING_MAIL_HOST, SPRING_MAIL_PORT, SPRING_MAIL_USERNAME,
-      # SPRING_MAIL_PASSWORD, MAIL_FROM, OTP_SMS_WEBHOOK_URL, OTP_SMS_WEBHOOK_TOKEN
+      MAIL_APP_PASSWORD: ${MAIL_APP_PASSWORD:-}          # Gmail App Password for nkharose.dev@gmail.com
+      # Optional mobile codes: OTP_SMS_WEBHOOK_URL, OTP_SMS_WEBHOOK_TOKEN
       QR_SECRET: ${QR_SECRET:-dev-only-change-this-secret-before-production}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}

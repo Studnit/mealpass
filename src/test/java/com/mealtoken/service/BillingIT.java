@@ -21,6 +21,9 @@ class BillingIT extends AbstractIntegrationTest {
     @Autowired BillingService billing;
     @Autowired SubscriptionRepository subs;
     @Autowired PaymentRepository paymentRepo;
+    @Autowired RedemptionService redemption;
+    @Autowired com.mealtoken.support.MutableClock clock;
+    @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     private Subscription approved(World w, Long customer) {
         var r = subscriptions.request(customer, w.hotel().getId(), w.planA().getId());
@@ -106,5 +109,30 @@ class BillingIT extends AbstractIntegrationTest {
         assertThat(billing.ledger(java.util.List.of(s.getId())).get(s.getId())).hasSize(2);
         payments.confirmManual(w.owner(), payments.findPendingIdFor(s.getId()), "CASH", null, bd("30.00"), false);
         assertThat(billing.customerLines(c).get(0).getDue()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void lastFiveTokensAreHeldWhileMoneyIsDueAndReleasedOncePaid() {
+        World w = fx.newWorld(); Long c = fx.newCustomer();
+        Subscription s = approved(w, c);
+        payments.receive(w.owner(), s.getId(), bd("40.00"), "CASH", null, true);        // part paid, activated
+        jdbc.update("UPDATE subscriptions SET remaining_tokens = 6, used_tokens = 24 WHERE id = ?", s.getId());
+        var cmd = new RedeemCommand(c, w.hotel().getId(), w.lunch().getId(), c, null, "TEST");
+        assertThat(redemption.redeem(cmd).remainingTokens()).isEqualTo(5);               // 6 > 5: allowed, leaves the held 5
+        clock.advance(java.time.Duration.ofDays(1));                                     // next day
+        assertThatThrownBy(() -> redemption.redeem(new RedeemCommand(c, w.hotel().getId(), w.lunch().getId(), c, null, "TEST")))
+                .hasMessage("error.redeem.balance.due");
+        payments.receive(w.owner(), s.getId(), bd("60.00"), "CASH", null, false);        // settled
+        assertThat(redemption.redeem(new RedeemCommand(c, w.hotel().getId(), w.lunch().getId(), c, null, "TEST")).remainingTokens()).isEqualTo(4);
+    }
+
+    @Test
+    void holdCanBeSwitchedOffPerHotel() {
+        World w = fx.newWorld(); Long c = fx.newCustomer();
+        jdbc.update("UPDATE hotels SET token_hold_count = 0 WHERE id = ?", w.hotel().getId());
+        Subscription s = approved(w, c);
+        payments.receive(w.owner(), s.getId(), bd("10.00"), "CASH", null, true);
+        jdbc.update("UPDATE subscriptions SET remaining_tokens = 2, used_tokens = 28 WHERE id = ?", s.getId());
+        assertThat(redemption.redeem(new RedeemCommand(c, w.hotel().getId(), w.lunch().getId(), c, null, "TEST")).remainingTokens()).isEqualTo(1);
     }
 }

@@ -15,17 +15,13 @@
   <div class="card mb-4" th:if="${canConfirm}">
     <div class="card-header" th:text="#{req.payments}">Awaiting payment confirmation</div>
     <div class="table-responsive"><table class="table align-middle mb-0">
-      <thead class="table-light"><tr><th th:text="#{col.customer}">Customer</th><th th:text="#{col.amount}">Amount</th><th></th></tr></thead>
+      <thead class="table-light"><tr><th th:text="#{col.customer}">Customer</th><th th:text="#{bill.due}">Remaining</th><th th:text="#{bill.pending.now}">Pending now</th><th></th></tr></thead>
       <tbody>
-        <tr th:if="${#lists.isEmpty(pendingPayments)}"><td colspan="3" class="text-center text-muted py-4" th:text="#{table.empty}">Nothing</td></tr>
+        <tr th:if="${#lists.isEmpty(pendingPayments)}"><td colspan="4" class="text-center text-muted py-4" th:text="#{table.empty}">Nothing</td></tr>
         <tr th:each="p : ${pendingPayments}">
-          <td th:text="${p.customer}">C</td><td th:text="${@fmt.money(p.amount)}">0</td>
+          <td th:text="${p.customer}">C</td><td class="money text-danger" th:text="${@fmt.money(p.total.subtract(p.paid))}">0</td><td class="money" th:text="${@fmt.money(p.amount)}">0</td>
           <td><div class="d-flex flex-wrap gap-1">
-            <form th:action="@{/staff/payments/{id}/confirm(id=${p.id})}" method="post" class="d-flex gap-1" th:attr="data-confirm=#{confirm.payment}">
-              <select class="form-select form-select-sm" name="method" th:attr="aria-label=#{col.method}">
-                <option value="CASH" th:text="#{status.CASH}">Cash</option><option value="UPI" th:text="#{status.UPI}" th:selected="${p.reference != ''}">UPI</option></select>
-              <input class="form-control form-control-sm" name="reference" maxlength="100" th:value="${p.reference}" th:placeholder="#{col.reference}" th:attr="aria-label=#{col.reference}">
-              <button class="btn btn-sm btn-success" type="submit" th:text="#{action.confirm}">Confirm</button></form>
+            <form th:replace="~{shared/pay-confirm :: form(${p}, 'staff')}"></form>
             <form th:action="@{/staff/payments/{id}/reject(id=${p.id})}" method="post" th:attr="data-confirm=#{confirm.reject}">
               <button class="btn btn-sm btn-outline-danger" type="submit" th:text="#{action.reject}">Reject</button></form>
           </div></td>

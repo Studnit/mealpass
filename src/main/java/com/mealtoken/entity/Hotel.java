@@ -45,6 +45,9 @@ public class Hotel {
     @Column(name = "low_token_threshold", nullable = false)
     private int lowTokenThreshold = 5;
 
+    @Column(name = "token_hold_count", nullable = false)
+    private int tokenHoldCount = 5;
+
     @Column(name = "owner_id", nullable = false)
     private Long ownerId;
 
@@ -76,6 +79,8 @@ public class Hotel {
     public void setEnforceMealWindow(boolean v) { this.enforceMealWindow = v; }
     public int getLowTokenThreshold() { return lowTokenThreshold; }
     public void setLowTokenThreshold(int v) { this.lowTokenThreshold = v; }
+    public int getTokenHoldCount() { return tokenHoldCount; }
+    public void setTokenHoldCount(int v) { this.tokenHoldCount = v; }
     public Long getOwnerId() { return ownerId; }
     public void setOwnerId(Long v) { this.ownerId = v; }
     public Instant getCreatedAt() { return createdAt; }

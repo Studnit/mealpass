@@ -25,6 +25,10 @@
         <div><small class="text-muted" th:text="#{bill.paid}">Paid</small><strong class="text-success" th:text="${@fmt.money(s.paidAmount)}">0</strong></div>
         <div><small class="text-muted" th:text="#{bill.due}">Remaining</small><strong th:classappend="${s.dueAmount.signum() > 0} ? 'text-danger' : 'text-success'" th:text="${@fmt.money(s.dueAmount)}">0</strong></div>
       </div>
+      <div class="alert alert-warning small py-2" th:if="${s.billed and s.dueAmount.signum() > 0}">
+        <i class="bi bi-hourglass-split"></i> <span th:text="#{bill.pending.notice(${@fmt.money(s.dueAmount)})}">Pending</span>
+        <span th:if="${s.heldTokens > 0}" th:text="#{bill.hold.notice(${s.heldTokens})}">Last tokens are on hold until paid.</span>
+      </div>
       <dl class="row small mb-2">
         <dt class="col-5" th:text="#{sub.start}">Start</dt><dd class="col-7" th:text="${@fmt.date(s.start)}">d</dd>
         <dt class="col-5" th:text="#{col.expiry}">Expiry</dt><dd class="col-7"><span th:text="${@fmt.date(s.expiry)}">d</span>

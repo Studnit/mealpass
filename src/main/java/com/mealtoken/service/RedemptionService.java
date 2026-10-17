@@ -3,6 +3,7 @@ package com.mealtoken.service;
 import com.mealtoken.audit.AuditService;
 import com.mealtoken.entity.*;
 import com.mealtoken.exception.BusinessException;
+import com.mealtoken.repository.PaymentRepository;
 import com.mealtoken.notification.NotificationService;
 import com.mealtoken.repository.*;
 import com.mealtoken.util.Refs;
@@ -36,14 +37,20 @@ public class RedemptionService {
     private final NotificationService notifications;
     private final Clock clock;
     private final EntityManager em;
+    private final PaymentRepository payments;
+
+    /** Tokens kept back while money is still due; at least one token always stays usable. */
+    public static int heldTokens(java.math.BigDecimal due, int hold, int totalTokens) {
+        return due.signum() > 0 ? Math.max(0, Math.min(hold, totalTokens - 1)) : 0;
+    }
 
     public RedemptionService(HotelRepository hotels, MealSlotRepository slots, SubscriptionRepository subs,
                              SubscriptionPlanRepository plans, MealAttendanceRepository attendance,
                              TokenTransactionRepository ledger, UserRepository users, AuditService audit,
-                             NotificationService notifications, Clock clock, EntityManager em) {
+                             NotificationService notifications, Clock clock, EntityManager em, PaymentRepository payments) {
         this.hotels = hotels; this.slots = slots; this.subs = subs; this.plans = plans;
         this.attendance = attendance; this.ledger = ledger; this.users = users; this.audit = audit;
-        this.notifications = notifications; this.clock = clock; this.em = em;
+        this.notifications = notifications; this.clock = clock; this.em = em; this.payments = payments;
     }
 
     @Transactional
@@ -78,6 +85,9 @@ public class RedemptionService {
         if (sub.getStartDate() == null || today.isBefore(sub.getStartDate())) throw new BusinessException("error.sub.notstarted");
         if (today.isAfter(sub.getExpiryDate())) throw new BusinessException("error.sub.expired");
         if (sub.getRemainingTokens() <= 0) throw new BusinessException("error.sub.exhausted");
+        java.math.BigDecimal due = sub.getTotalAmount().subtract(payments.sumPaid(sub.getId()));
+        if (sub.getRemainingTokens() <= heldTokens(due, hotel.getTokenHoldCount(), sub.getTotalTokens()))
+            throw new BusinessException("error.redeem.balance.due");
 
         SubscriptionPlan plan = plans.findById(sub.getPlanId()).orElseThrow(() -> new BusinessException("error.notfound"));
         if (attendance.countBySubscriptionIdAndAttendanceDateAndStatus(sub.getId(), today, "SERVED") >= plan.getMealsPerDay())

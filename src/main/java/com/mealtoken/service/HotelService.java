@@ -96,7 +96,7 @@ public class HotelService {
 
     @Transactional
     public void updateProfile(HotelContext ctx, String name, String address, String city, String area, String phone, String operatingHours,
-                              String timezone, boolean enforceMealWindow, int lowTokenThreshold) {
+                              String timezone, boolean enforceMealWindow, int lowTokenThreshold, int tokenHoldCount) {
         if (!ctx.owner()) throw new BusinessException("error.forbidden");
         if (name == null || name.isBlank() || name.length() > 150) throw new BusinessException("error.hotel.name.required");
         try { ZoneId.of(timezone); } catch (DateTimeException | NullPointerException e) { throw new BusinessException("error.timezone.invalid"); }
@@ -111,6 +111,8 @@ public class HotelService {
         h.setTimezone(timezone);
         h.setEnforceMealWindow(enforceMealWindow);
         h.setLowTokenThreshold(lowTokenThreshold);
+        if (tokenHoldCount < 0 || tokenHoldCount > 30) throw new BusinessException("error.plan.invalid");
+        h.setTokenHoldCount(tokenHoldCount);
         hotels.save(h);
         audit.log(ctx.userId(), h.getId(), "HOTEL_PROFILE_UPDATED", "Hotel", h.getId(), null);
     }

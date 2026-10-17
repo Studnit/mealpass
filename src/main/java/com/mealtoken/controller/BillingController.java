@@ -27,8 +27,10 @@ public class BillingController {
     @GetMapping("/customer/billing")
     public String customer(Model m) {
         AppUserDetails u = CurrentUser.require();
-        var lines = billing.customerLines(u.getId());
+        var lines = new java.util.ArrayList<>(billing.customerLines(u.getId()));
+        lines.sort(java.util.Comparator.comparing(BillingService.Line::isSettled));   // money still due first
         m.addAttribute("lines", lines);
+        m.addAttribute("pendingCount", lines.stream().filter(l -> !l.isSettled()).count());
         m.addAttribute("totalPaid", lines.stream().map(BillingService.Line::getPaid).reduce(BigDecimal.ZERO, BigDecimal::add));
         m.addAttribute("totalDue", lines.stream().map(BillingService.Line::getDue).reduce(BigDecimal.ZERO, BigDecimal::add));
         m.addAttribute("receipts", billing.customerReceipts(u.getId(), 20));
@@ -42,8 +44,10 @@ public class BillingController {
         HotelContext ctx = access.current();
         m.addAttribute("hotel", ctx.hotel());
         m.addAttribute("summary", billing.hotelSummary(ctx.hotelId(), ctx.hotel().getTimezone()));
-        var lines = billing.hotelLines(ctx.hotelId());
+        var lines = new java.util.ArrayList<>(billing.hotelLines(ctx.hotelId()));
+        lines.sort(java.util.Comparator.comparing(BillingService.Line::isSettled));
         m.addAttribute("lines", lines);
+        m.addAttribute("pendingCount", lines.stream().filter(l -> !l.isSettled()).count());
         m.addAttribute("ledger", billing.ledger(lines.stream().map(BillingService.Line::getSubscriptionId).toList()));
         m.addAttribute("section", "billing");
         return "owner/billing";

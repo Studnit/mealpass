@@ -15,7 +15,10 @@
 
   <p class="text-muted" th:if="${#lists.isEmpty(lines)}" th:text="#{bill.none}">No bills yet.</p>
   <div class="vstack gap-3">
-    <div class="card card-body" th:each="l : ${lines}">
+<th:block th:each="l, st : ${lines}">
+      <h2 class="h6 m-0 text-danger" th:if="${st.index == 0 and pendingCount > 0}"><i class="bi bi-hourglass-split"></i> <span th:text="#{bill.section.pending}">Pending balance</span></h2>
+      <h2 class="h6 m-0 mt-2 text-success" th:if="${st.index == pendingCount and st.index > 0 or (st.index == 0 and pendingCount == 0)}"><i class="bi bi-check2-circle"></i> <span th:text="#{bill.section.settled}">Fully paid</span></h2>
+    <div class="card card-body" th:classappend="${!l.settled} ? 'border-danger'">
       <div class="d-flex justify-content-between align-items-start">
         <div><strong th:text="${l.party}">Customer</strong> <small class="text-muted" th:text="${l.phone}"></small><div class="small text-muted" th:text="${l.planName}">Plan</div></div>
         <span th:replace="~{fragments/ui :: badge(${l.status})}"></span>
@@ -25,6 +28,11 @@
         <div><small class="text-muted" th:text="#{bill.total}">Total</small><strong class="money" th:text="${@fmt.money(l.total)}">0</strong></div>
         <div><small class="text-muted" th:text="#{bill.paid}">Paid</small><strong class="text-success money" th:text="${@fmt.money(l.paid)}">0</strong></div>
         <div><small class="text-muted" th:text="#{bill.due}">Remaining</small><strong class="money" th:classappend="${l.settled} ? 'text-success' : 'text-danger'" th:text="${@fmt.money(l.due)}">0</strong></div>
+      </div>
+      <div class="alert alert-warning small py-2 mb-0 mt-2" th:unless="${l.settled}">
+        <i class="bi bi-hourglass-split"></i>
+        <span th:text="#{bill.pending.notice(${@fmt.money(l.due)})}">Pending</span>
+        <span th:if="${l.heldTokens > 0}" th:text="#{bill.hold.notice(${l.heldTokens})}">Last tokens are on hold until paid.</span>
       </div>
       <details class="mt-2" th:if="${ledger.get(l.subscriptionId) != null}">
         <summary class="small text-muted" th:text="#{bill.ledger}">Payment details</summary>
@@ -44,6 +52,7 @@
         <div class="col-4 col-md-2"><button class="btn btn-brand w-100" type="submit"><i class="bi bi-cash-coin"></i><span th:text="#{bill.receive}">Receive</span></button></div>
       </form>
     </div>
+    </th:block>
   </div>
   <div class="actions mt-3 no-print"><a class="btn btn-outline-secondary" th:href="@{/owner/dashboard}"><i class="bi bi-arrow-left"></i><span th:text="#{action.back}">Back</span></a></div>
 </section>

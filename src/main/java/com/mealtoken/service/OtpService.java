@@ -39,14 +39,14 @@ public class OtpService {
 
     private final OtpCodeRepository codes;
     private final UserRepository users;
-    private final List<OtpSender> senders;
+    private final org.springframework.beans.factory.ObjectProvider<OtpSender> senders;
     private final RequestRateLimiter limiter;
     private final AuditService audit;
     private final Clock clock;
     private final byte[] secret;
     private final boolean required;
 
-    public OtpService(OtpCodeRepository codes, UserRepository users, List<OtpSender> senders, RequestRateLimiter limiter,
+    public OtpService(OtpCodeRepository codes, UserRepository users, org.springframework.beans.factory.ObjectProvider<OtpSender> senders, RequestRateLimiter limiter,
                       AuditService audit, Clock clock, @Value("${app.security.qr-secret}") String secret,
                       @Value("${app.otp.required:true}") boolean required) {
         this.codes = codes; this.users = users; this.senders = senders; this.limiter = limiter; this.audit = audit;
@@ -77,7 +77,7 @@ public class OtpService {
         o.setCreatedAt(clock.instant());
         codes.save(o);
         boolean sent = false;
-        for (OtpSender s : senders) {
+        for (OtpSender s : senders.orderedStream().toList()) {   // none configured is fine: the code is logged instead
             if (!s.supports(u)) continue;
             try { s.send(u, code, VALID_MINUTES); sent = true; } catch (Exception e) { log.warn("OTP delivery failed for user {}: {}", u.getId(), e.toString()); }
         }

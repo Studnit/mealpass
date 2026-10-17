@@ -133,3 +133,11 @@ For production put the app behind a TLS-terminating reverse proxy and set `serve
 ### Railway
 
 The Dockerfile has no `VOLUME` instruction because Railway fails validation on it. Uploaded logos live in `/app/uploads`; to keep them across deploys, add a Railway volume mounted at `/app/uploads`. Set `DB_URL` (e.g. `jdbc:postgresql://<host>:5432/<db>` from the Postgres service's *private* or *public* host), `DB_USERNAME`, `DB_PASSWORD`, `PUBLIC_BASE_URL`, `QR_SECRET` and `ADMIN_PASSWORD`.
+
+## Pending balance and held tokens
+
+If a customer has paid only part of the plan price, the unpaid amount shows as **Pending balance** on their Billing page and subscription card, and on the owner's Billing page. While money is still due, the customer's **last 5 tokens are held**: they can use tokens until 5 remain, and the rest unlock as soon as the balance is paid. The owner can change the number (0 turns it off) under *My hotel* ("Tokens held until fully paid"). Migration `V6__token_hold.sql` adds the setting.
+
+### Email sender (Gmail)
+
+Verification codes are emailed from `nkharose.dev@gmail.com`, configured under `spring.mail` in `src/main/resources/application.yml` (Gmail SMTP, port 587). Replace `PUT_APP_PASSWORD_HERE` with a Google **App Password** (Google Account, Security, 2-Step Verification, App passwords; 16 characters, no spaces), or set the `MAIL_APP_PASSWORD` environment variable (recommended on Railway, so the password is not stored in GitHub). The normal account password will not work. Until a password is set, sending fails quietly and the code is written to the server log.

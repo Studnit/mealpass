@@ -26,8 +26,11 @@ public class OwnerQueryService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> pendingPayments(Long hotelId) {
         return jdbc.queryForList(
-                "SELECT p.id, u.full_name AS customer, p.amount, p.payment_method AS method, COALESCE(p.payment_reference, '') AS reference "
-                        + "FROM payments p JOIN users u ON u.id = p.customer_id WHERE p.hotel_id = ? AND p.status = 'PENDING' "
+                "SELECT p.id, u.full_name AS customer, p.amount, p.payment_method AS method, COALESCE(p.payment_reference, '') AS reference, "
+                        + "s.status AS sub_status, s.total_amount AS total, "
+                        + "COALESCE((SELECT SUM(x.amount) FROM payments x WHERE x.subscription_id = s.id AND x.status = 'SUCCESS'), 0) AS paid "
+                        + "FROM payments p JOIN users u ON u.id = p.customer_id JOIN subscriptions s ON s.id = p.subscription_id "
+                        + "WHERE p.hotel_id = ? AND p.status = 'PENDING' "
                         + "AND p.subscription_id IS NOT NULL ORDER BY p.id", hotelId);
     }
 

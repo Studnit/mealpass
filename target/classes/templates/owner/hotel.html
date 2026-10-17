@@ -36,6 +36,9 @@
         </div>
         <div class="mb-3"><label class="form-label" for="lt" th:text="#{hotel.low.threshold}">Low token alert at</label>
           <input class="form-control" type="number" min="0" max="100" id="lt" name="lowTokenThreshold" th:value="${hotel.lowTokenThreshold}"></div>
+        <div class="mb-3"><label class="form-label" for="th" th:text="#{hotel.hold}">Tokens held until fully paid</label>
+          <input class="form-control" type="number" min="0" max="30" id="th" name="tokenHoldCount" th:value="${hotel.tokenHoldCount}">
+          <div class="form-text" th:text="#{hotel.hold.help}">While a customer still owes money, this many of their last tokens cannot be used. 0 turns it off.</div></div>
         <div class="form-actions">
           <button type="button" class="btn btn-outline-secondary" data-back th:attr="data-fallback=@{/owner/dashboard}"><i class="bi bi-x-lg"></i><span th:text="#{action.cancel}">Cancel</span></button>
           <button class="btn btn-brand" type="submit"><i class="bi bi-check-lg"></i><span th:text="#{action.save}">Save</span></button>
