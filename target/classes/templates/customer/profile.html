@@ -9,7 +9,7 @@
     <div class="mb-3"><label class="form-label" for="em" th:text="#{login.email}">Email</label>
       <input class="form-control" id="em" th:value="${user.email}" disabled></div>
     <div class="mb-3"><label class="form-label" for="ph" th:text="#{register.phone}">Phone</label>
-      <input class="form-control" id="ph" name="phone" maxlength="20" th:value="${user.phone}"></div>
+      <input class="form-control" id="ph" name="phone" type="tel" inputmode="numeric" pattern="[6-9][0-9]{9}" maxlength="10" th:attr="title=#{validation.phone}" th:value="${user.phone}"></div>
     <div class="mb-3"><label class="form-label" for="lg" th:text="#{nav.language}">Language</label>
       <select class="form-select" id="lg" name="language">
         <option value="en" th:selected="${user.preferredLanguage == 'en'}" th:text="#{lang.en}">English</option>

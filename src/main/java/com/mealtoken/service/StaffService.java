@@ -40,7 +40,7 @@ public class StaffService {
         User u = new User();
         u.setFullName(fullName.trim());
         u.setEmail(mail);
-        u.setPhone(phone == null || phone.isBlank() ? null : phone.trim());
+        u.setPhone(com.mealtoken.util.Validators.mobileOrNull(phone));
         u.setPasswordHash(encoder.encode(password));
         u.getRoles().add(roles.findByName("STAFF").orElseThrow());
         u = users.save(u);

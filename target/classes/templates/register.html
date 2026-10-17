@@ -18,12 +18,12 @@
         </div>
         <div class="mb-3">
           <label for="email" class="form-label" th:text="#{login.email}">Email</label>
-          <input id="email" type="email" th:field="*{email}" class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" required>
+          <input id="email" type="email" th:field="*{email}" maxlength="190" pattern="[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}" th:attr="title=#{validation.email}" class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" required>
           <div class="invalid-feedback" th:errors="*{email}"></div>
         </div>
         <div class="mb-3">
           <label for="phone" class="form-label" th:text="#{register.phone}">Phone</label>
-          <input id="phone" th:field="*{phone}" class="form-control" th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'">
+          <input id="phone" th:field="*{phone}" type="tel" inputmode="numeric" pattern="[6-9][0-9]{9}" minlength="10" maxlength="10" required autocomplete="tel-national" th:attr="title=#{validation.phone}" class="form-control" th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'">
           <div class="invalid-feedback" th:errors="*{phone}"></div>
         </div>
         <div class="mb-3">

@@ -206,11 +206,12 @@ public class CustomerController {
     public String saveProfile(@RequestParam String fullName, @RequestParam(required = false) String phone,
                               @RequestParam String language, RedirectAttributes ra) {
         if (fullName.isBlank() || fullName.length() > 150 || !Set.of("en", "mr", "hi").contains(language)
-                || (phone != null && !phone.isBlank() && !phone.matches("^[0-9+\\- ]{7,20}$")))
+                )
             throw new BusinessException("error.input.invalid");
+        String cleanPhone = com.mealtoken.util.Validators.mobileOrNull(phone);
         User u = users.findById(CurrentUser.require().getId()).orElseThrow();
         u.setFullName(fullName.trim());
-        u.setPhone(phone == null || phone.isBlank() ? null : phone.trim());
+        u.setPhone(cleanPhone);
         u.setPreferredLanguage(language);
         users.save(u);
         ra.addFlashAttribute("ok", "ok.saved");

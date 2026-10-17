@@ -106,7 +106,7 @@ public class HotelService {
         h.setAddress(trim(address, 300));
         h.setCity(trim(city, 80));
         h.setArea(trim(area, 80));
-        h.setPhone(trim(phone, 20));
+        h.setPhone(com.mealtoken.util.Validators.mobileOrNull(phone));
         h.setOperatingHours(trim(operatingHours, 100));
         h.setTimezone(timezone);
         h.setEnforceMealWindow(enforceMealWindow);

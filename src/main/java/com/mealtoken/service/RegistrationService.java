@@ -35,6 +35,8 @@ public class RegistrationService {
     /** @param verified true for accounts created by an administrator (no code needed) */
     @Transactional
     public User register(RegistrationForm f, String language, boolean verified) {
+        com.mealtoken.util.Validators.requireEmail(f.getEmail());
+        String phone = com.mealtoken.util.Validators.mobileOrNull(f.getPhone());
         if (users.existsByEmailIgnoreCase(f.getEmail()))
             throw new BusinessException("error.email.exists");
         boolean owner = "OWNER".equals(f.getAccountType());
@@ -44,7 +46,7 @@ public class RegistrationService {
         User u = new User();
         u.setFullName(f.getFullName().trim());
         u.setEmail(f.getEmail().trim().toLowerCase(Locale.ROOT));
-        u.setPhone(f.getPhone());
+        u.setPhone(phone);
         u.setPasswordHash(encoder.encode(f.getPassword()));
         u.setPreferredLanguage(language);
         if (verified) u.setVerifiedAt(clock.instant());
@@ -58,7 +60,7 @@ public class RegistrationService {
             h.setOwnerId(u.getId());
             h.setCity(blankToNull(f.getCity()));
             h.setArea(blankToNull(f.getArea()));
-            h.setPhone(blankToNull(f.getPhone()));
+            h.setPhone(phone);
             h.setStatus("PENDING"); // Super Admin must approve before it goes live
             hotels.save(h);
         }

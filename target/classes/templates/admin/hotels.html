@@ -36,7 +36,7 @@
       <div class="col-md-6"><label class="form-label" for="hc" th:text="#{hotel.city}">City</label><input class="form-control" id="hc" name="city" maxlength="80"></div>
       <div class="col-md-6"><label class="form-label" for="ha" th:text="#{hotel.area}">Area</label><input class="form-control" id="ha" name="area" maxlength="80"></div>
       <div class="col-md-4"><label class="form-label" for="oe" th:text="#{login.email}">Email</label><input class="form-control" type="email" id="oe" name="email" required maxlength="190"></div>
-      <div class="col-md-4"><label class="form-label" for="op" th:text="#{register.phone}">Phone</label><input class="form-control" id="op" name="phone" maxlength="20"></div>
+      <div class="col-md-4"><label class="form-label" for="op" th:text="#{register.phone}">Phone</label><input class="form-control" id="op" name="phone" type="tel" inputmode="numeric" pattern="[6-9][0-9]{9}" maxlength="10" required></div>
       <div class="col-md-4"><label class="form-label" for="opw" th:text="#{login.password}">Password</label><input class="form-control" type="password" id="opw" name="password" required minlength="8" maxlength="72" autocomplete="new-password"></div>
     </div>
     <button class="btn btn-brand mt-3 align-self-start" type="submit" th:text="#{action.add}">Add</button>

@@ -6,10 +6,12 @@ public class RegistrationForm {
     @NotBlank @Size(max = 150)
     private String fullName;
 
-    @NotBlank @Email @Size(max = 190)
+    @NotBlank @Size(max = 190)
+    @Pattern(regexp = com.mealtoken.util.Validators.EMAIL_REGEX, message = "{validation.email}")
     private String email;
 
-    @Pattern(regexp = "^[0-9+\\- ]{7,20}$", message = "{validation.phone}")
+    @NotBlank(message = "{validation.phone}")
+    @Pattern(regexp = com.mealtoken.util.Validators.MOBILE_REGEX, message = "{validation.phone}")
     private String phone;
 
     @NotBlank @Size(min = 8, max = 72)
