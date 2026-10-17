@@ -4,7 +4,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://postgres.railway.internal:5432/railway}
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:YvYmQcNDeTnIJWjiMZsypddAIcTDDqAc}
+    password: YvYmQcNDeTnIJWjiMZsypddAIcTDDqAc
   jpa:
     hibernate:
       ddl-auto: validate
