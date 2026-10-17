@@ -21,13 +21,13 @@
 
 <a class="visually-hidden-focusable" href="#main-content" th:text="#{a11y.skip}">Skip to content</a>
 
-<nav class="navbar bg-white border-bottom sticky-top px-3">
+<nav class="navbar app-topbar bg-white border-bottom sticky-top px-3">
   <button class="btn btn-outline-secondary d-md-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#navDrawer"
           th:attr="aria-label=#{nav.menu}"><i class="bi bi-list"></i></button>
-  <a class="navbar-brand fw-bold text-brand me-auto" th:href="@{/home}">
+  <a class="navbar-brand app-brand fw-bold text-brand me-auto" th:href="@{/home}">
     <i class="bi bi-qr-code-scan me-1"></i><span th:text="#{app.name}">Meal Token System</span>
   </a>
-  <ul class="navbar-nav flex-row align-items-center gap-2">
+  <ul class="navbar-nav app-actions flex-row align-items-center gap-2 ms-auto flex-shrink-0">
     <li class="nav-item">
       <button id="installApp" type="button" class="btn btn-brand btn-sm d-none" th:attr="data-ios-hint=#{install.ios}"><i class="bi bi-download"></i> <span th:text="#{install.button}">Install app</span></button>
     </li>

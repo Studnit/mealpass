@@ -132,3 +132,20 @@ a:focus-visible { outline: 3px solid rgba(22,106,70,.5); outline-offset: 2px; bo
   nav, .sidebar, .scan-fab, .bottom-nav, .page-bar, .no-print, .offcanvas { display: none !important; }
   .content { padding: 0 !important; } body { background: #fff; }
 }
+
+/* ===== Top bar: menu + brand on the left, actions together on the right, always one row ===== */
+.app-topbar { flex-wrap: nowrap; gap: .5rem; padding-top: .45rem; padding-bottom: .45rem; }
+.app-topbar > .btn { flex-shrink: 0; margin-right: 0 !important; }
+.app-brand { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; display: flex; align-items: center; gap: .35rem; overflow: hidden; white-space: nowrap; font-size: 1.15rem; }
+.app-brand span { overflow: hidden; text-overflow: ellipsis; }
+.app-actions { margin-left: auto; }
+.app-actions .btn { min-width: 38px; padding-left: .6rem; padding-right: .6rem; }
+@media (max-width: 575.98px) {
+  .app-brand { font-size: .95rem; letter-spacing: -.02em; }
+  .app-brand i { display: none; }               /* the title alone is enough on a phone */
+  .app-topbar { padding-left: .6rem !important; padding-right: .6rem !important; }
+  .app-actions { gap: .3rem !important; }
+  .app-actions .dropdown-toggle::after { display: none; }
+  .app-actions .btn-sm { min-height: 36px; }
+  #installApp span { display: none; }
+}
