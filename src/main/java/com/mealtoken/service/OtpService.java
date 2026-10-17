@@ -48,7 +48,7 @@ public class OtpService {
 
     public OtpService(OtpCodeRepository codes, UserRepository users, org.springframework.beans.factory.ObjectProvider<OtpSender> senders, RequestRateLimiter limiter,
                       AuditService audit, Clock clock, @Value("${app.security.qr-secret}") String secret,
-                      @Value("${app.otp.required:true}") boolean required) {
+                      @Value("${app.otp.enabled:true}") boolean required) {
         this.codes = codes; this.users = users; this.senders = senders; this.limiter = limiter; this.audit = audit;
         this.clock = clock; this.secret = secret.getBytes(StandardCharsets.UTF_8); this.required = required;
     }

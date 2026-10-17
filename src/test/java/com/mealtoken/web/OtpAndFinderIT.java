@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
-@TestPropertySource(properties = "app.otp.required=true")
+@TestPropertySource(properties = "app.otp.enabled=true")
 @Import(OtpAndFinderIT.Capture.class)
 class OtpAndFinderIT extends AbstractIntegrationTest {
     /** Captures the code instead of sending it. */
@@ -124,7 +124,7 @@ class OtpAndFinderIT extends AbstractIntegrationTest {
 
     private com.mealtoken.entity.Hotel locate(com.mealtoken.security.HotelContext ctx) {
         String city = Fixtures.unique("City"), area = Fixtures.unique("Area");
-        hotelService.updateProfile(ctx, ctx.hotel().getName(), "Main road", city, area, null, null, "Asia/Kolkata", false, 5);
+        hotelService.updateProfile(ctx, ctx.hotel().getName(), "Main road", city, area, null, null, "Asia/Kolkata", false, 5, 5);
         var h = ctx.hotel();
         h.setCity(city); h.setArea(area);
         return h;

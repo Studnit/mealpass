@@ -21,7 +21,7 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@mealtoken.local}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-ChangeMe#2026}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
-      OTP_REQUIRED: ${OTP_REQUIRED:-true}
+      OTP_ENABLED: ${OTP_ENABLED:-true}
       MAIL_APP_PASSWORD: ${MAIL_APP_PASSWORD:-}          # Gmail App Password for nkharose.dev@gmail.com
       # Optional mobile codes: OTP_SMS_WEBHOOK_URL, OTP_SMS_WEBHOOK_TOKEN
       QR_SECRET: ${QR_SECRET:-dev-only-change-this-secret-before-production}

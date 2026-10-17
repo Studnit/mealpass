@@ -3,7 +3,7 @@ spring:
     name: meal-token-system
   datasource:
     url: ${DB_URL:jdbc:postgresql://postgres.railway.internal:5432/railway}
-    username: ${DB_USERNAME:postgres }
+    username: ${DB_USERNAME:postgres}
     password: YvYmQcNDeTnIJWjiMZsypddAIcTDDqAc
   jpa:
     hibernate:
@@ -22,8 +22,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: kharose2020@gmail.com
-    password: ${MAIL_APP_PASSWORD:hrif okjy bczn nszd}
+    username: nkharose.dev@gmail.com
+    password: ${MAIL_APP_PASSWORD:PUT_APP_PASSWORD_HERE}
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
@@ -60,7 +60,8 @@ app:
   # Email / mobile verification at sign-up. Email is sent through spring.mail (Gmail, see above);
   # a mobile code is sent when OTP_SMS_WEBHOOK_URL is set (any SMS / WhatsApp gateway that accepts a JSON webhook).
   otp:
-    required: ${OTP_REQUIRED:true}
+    # true: new accounts must verify a code before signing in. false: no verification (accounts are active immediately).
+    enabled: ${OTP_ENABLED:true}
     sms-webhook-url: ${OTP_SMS_WEBHOOK_URL:}
     sms-webhook-token: ${OTP_SMS_WEBHOOK_TOKEN:}
   mail:

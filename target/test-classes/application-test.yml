@@ -5,7 +5,7 @@ spring:
     show-sql: false
 app:
   otp:
-    required: false
+    enabled: false
   public-base-url: http://localhost:8080
   bootstrap:
     admin-email: admin@test.local

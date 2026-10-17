@@ -24,11 +24,11 @@ public class RegistrationService {
     private final boolean otpRequired;
 
     public RegistrationService(UserRepository users, RoleRepository roles, HotelRepository hotels, PasswordEncoder encoder,
-                               java.time.Clock clock, @org.springframework.beans.factory.annotation.Value("${app.otp.required:true}") boolean otpRequired) {
+                               java.time.Clock clock, @org.springframework.beans.factory.annotation.Value("${app.otp.enabled:true}") boolean otpRequired) {
         this.users = users; this.roles = roles; this.hotels = hotels; this.encoder = encoder; this.clock = clock; this.otpRequired = otpRequired;
     }
 
-    /** Self-service registration: the account must be verified by a code first when app.otp.required is true. */
+    /** Self-service registration: the account must be verified by a code first when app.otp.enabled is true. */
     @Transactional
     public User register(RegistrationForm f, String language) { return register(f, language, !otpRequired); }
 
