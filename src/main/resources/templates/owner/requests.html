@@ -33,11 +33,7 @@
         <tr th:each="p : ${payments}">
           <td th:text="${p.customer}">C</td><td class="money" th:text="${@fmt.money(p.total)}">0</td><td class="money text-success" th:text="${@fmt.money(p.paid)}">0</td><td class="money text-danger" th:text="${@fmt.money(p.total.subtract(p.paid))}">0</td><td class="money" th:text="${@fmt.money(p.amount)}">0</td><td th:text="${p.reference}">R</td>
           <td>
-            <div class="d-flex flex-wrap gap-1">
-              <form th:replace="~{shared/pay-confirm :: form(${p}, 'owner')}"></form>
-              <form th:action="@{/owner/payments/{id}/reject(id=${p.id})}" method="post" th:attr="data-confirm=#{confirm.reject}">
-                <button class="btn btn-sm btn-outline-danger" type="submit" th:text="#{action.reject}">Reject</button></form>
-            </div>
+            <th:block th:replace="~{shared/pay-confirm :: form(${p.id}, ${p.amount}, ${p.reference}, ${p.sub_status}, 'owner')}"></th:block>
           </td>
         </tr>
       </tbody></table></div>

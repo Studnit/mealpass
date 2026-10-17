@@ -135,4 +135,14 @@ class BillingIT extends AbstractIntegrationTest {
         jdbc.update("UPDATE subscriptions SET remaining_tokens = 2, used_tokens = 28 WHERE id = ?", s.getId());
         assertThat(redemption.redeem(new RedeemCommand(c, w.hotel().getId(), w.lunch().getId(), c, null, "TEST")).remainingTokens()).isEqualTo(1);
     }
+
+    @Test
+    void alertLevelWarnsFiveTokensBeforeTheHoldAndBlocksAtTheHold() {
+        BigDecimal due = bd("100");
+        assertThat(RedemptionService.alertLevel(due, 5, 30, 11)).isEqualTo(0);   // plenty left
+        assertThat(RedemptionService.alertLevel(due, 5, 30, 10)).isEqualTo(1);   // 5 above the held tokens: warn
+        assertThat(RedemptionService.alertLevel(due, 5, 30, 6)).isEqualTo(1);
+        assertThat(RedemptionService.alertLevel(due, 5, 30, 5)).isEqualTo(2);    // held
+        assertThat(RedemptionService.alertLevel(BigDecimal.ZERO, 5, 30, 5)).isEqualTo(0);   // settled: no alert
+    }
 }

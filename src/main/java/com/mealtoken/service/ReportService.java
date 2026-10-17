@@ -137,6 +137,9 @@ public class ReportService {
                 c("used", "s.used_tokens", Kind.NUM),
                 c("remaining", "s.remaining_tokens", Kind.NUM),
                 c("status", "s.status", Kind.STATUS),
+                c("billed", "s.total_amount", Kind.MONEY),
+                c("paid", "COALESCE((SELECT SUM(px.amount) FROM payments px WHERE px.subscription_id = s.id AND px.status = 'SUCCESS'), 0)", Kind.MONEY),
+                c("due", "GREATEST(s.total_amount - COALESCE((SELECT SUM(px.amount) FROM payments px WHERE px.subscription_id = s.id AND px.status = 'SUCCESS'), 0), 0)", Kind.MONEY),
                 c("paystatus", "s.payment_status", Kind.STATUS),
                 c("kind", "CASE WHEN EXISTS (SELECT 1 FROM subscriptions p2 WHERE p2.customer_id = s.customer_id "
                         + "AND p2.hotel_id = s.hotel_id AND p2.id < s.id AND p2.payment_status = 'SUCCESS') "

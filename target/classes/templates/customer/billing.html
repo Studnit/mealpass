@@ -29,6 +29,11 @@
         <span th:text="#{bill.pending.notice(${@fmt.money(l.due)})}">Pending</span>
         <span th:if="${l.heldTokens > 0}" th:text="#{bill.hold.notice(${l.heldTokens})}">Last tokens are on hold until paid.</span>
       </div>
+      <div class="alert small py-2 mb-0 mt-2" th:classappend="${l.alertLevel == 2} ? 'alert-danger' : 'alert-warning'" th:if="${l.alertLevel > 0}" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:if="${l.alertLevel == 1}" th:text="#{bill.alert.warn(${l.tokensBeforeHold}, ${@fmt.money(l.due)})}">Settle</span>
+        <span th:if="${l.alertLevel == 2}" th:text="#{bill.alert.blocked(${@fmt.money(l.due)})}">Settle</span>
+      </div>
       <details class="mt-2" th:if="${ledger.get(l.subscriptionId) != null}">
         <summary class="small text-muted" th:text="#{bill.ledger}">Payment details</summary>
         <ul class="list-group list-group-flush small mt-1">

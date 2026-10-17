@@ -163,3 +163,15 @@ a:focus-visible { outline: 3px solid rgba(22,106,70,.5); outline-offset: 2px; bo
 .bill-strip small { display: block; font-size: .75rem; }
 .bill-strip strong { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
 .money { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ===== Tables and payment confirmation ===== */
+.table-responsive > .table td:not(.wrap) { white-space: nowrap; }
+.table td.no-print { min-width: 15rem; }
+.card-body .form-control, .card-body .form-select { min-height: 2.5rem; }
+.card-body .form-control-sm, .card-body .form-select-sm { min-height: 2rem; }
+.pay-form { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem .5rem; min-width: 14rem; max-width: 18rem; padding: .25rem 0; }
+.pay-field { display: block; margin: 0; }
+.pay-field small { display: block; color: var(--muted); font-size: .72rem; margin-bottom: .1rem; }
+.pay-wide { grid-column: 1 / -1; }
+.pay-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.pay-buttons .btn { display: inline-flex; align-items: center; justify-content: center; gap: .3rem; }

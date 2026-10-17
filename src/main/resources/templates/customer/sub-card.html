@@ -29,6 +29,11 @@
         <i class="bi bi-hourglass-split"></i> <span th:text="#{bill.pending.notice(${@fmt.money(s.dueAmount)})}">Pending</span>
         <span th:if="${s.heldTokens > 0}" th:text="#{bill.hold.notice(${s.heldTokens})}">Last tokens are on hold until paid.</span>
       </div>
+      <div class="alert small py-2 mb-0 mt-2" th:classappend="${s.alertLevel == 2} ? 'alert-danger' : 'alert-warning'" th:if="${s.alertLevel > 0}" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:if="${s.alertLevel == 1}" th:text="#{bill.alert.warn(${s.tokensBeforeHold}, ${@fmt.money(s.dueAmount)})}">Settle</span>
+        <span th:if="${s.alertLevel == 2}" th:text="#{bill.alert.blocked(${@fmt.money(s.dueAmount)})}">Settle</span>
+      </div>
       <dl class="row small mb-2">
         <dt class="col-5" th:text="#{sub.start}">Start</dt><dd class="col-7" th:text="${@fmt.date(s.start)}">d</dd>
         <dt class="col-5" th:text="#{col.expiry}">Expiry</dt><dd class="col-7"><span th:text="${@fmt.date(s.expiry)}">d</span>

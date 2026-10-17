@@ -141,3 +141,5 @@ If a customer has paid only part of the plan price, the unpaid amount shows as *
 ### Email sender (Gmail)
 
 Verification codes are emailed from `nkharose.dev@gmail.com`, configured under `spring.mail` in `src/main/resources/application.yml` (Gmail SMTP, port 587). Replace `PUT_APP_PASSWORD_HERE` with a Google **App Password** (Google Account, Security, 2-Step Verification, App passwords; 16 characters, no spaces), or set the `MAIL_APP_PASSWORD` environment variable (recommended on Railway, so the password is not stored in GitHub). The normal account password will not work. Until a password is set, sending fails quietly and the code is written to the server log.
+
+When the customer is within 5 tokens of the held ones, both the customer (subscription card, Billing page, notification) and the owner (Billing page, notification) see a "settle the remaining amount" alert; it turns red once the last tokens are on hold.

@@ -19,9 +19,11 @@ public class BillingService {
     @lombok.Value
     public static class Line {
         Long subscriptionId; String party; String phone; String planName; String status;
-        BigDecimal total; BigDecimal paid; Long pendingPaymentId; String pendingReference; int hold;
+        BigDecimal total; BigDecimal paid; Long pendingPaymentId; String pendingReference; int hold; int remainingTokens; int totalTokens;
         public BigDecimal getDue() { return total.subtract(paid).max(BigDecimal.ZERO); }
         public int getPercentPaid() { return total.signum() == 0 ? 100 : Math.min(100, paid.multiply(BigDecimal.valueOf(100)).divide(total, 0, java.math.RoundingMode.DOWN).intValue()); }
+        public int getAlertLevel() { return RedemptionService.alertLevel(getDue(), hold, totalTokens, remainingTokens); }
+        public int getTokensBeforeHold() { return Math.max(0, remainingTokens - getHeldTokens()); }
         public int getHeldTokens() { return getDue().signum() > 0 ? hold : 0; }
         public boolean isSettled() { return getDue().signum() == 0; }
     }
@@ -38,7 +40,7 @@ public class BillingService {
     @Transactional(readOnly = true)
     public List<Line> customerLines(Long customerId) {
         return jdbc.query("SELECT s.id, h.name AS party, '' AS phone, sp.plan_name, s.status, s.total_amount AS total, " + PAID + " AS paid, "
-                        + pendingId() + " AS pending_id, " + pendingRef() + " AS pending_ref, h.token_hold_count AS hold "
+                        + pendingId() + " AS pending_id, " + pendingRef() + " AS pending_ref, h.token_hold_count AS hold, s.remaining_tokens AS rem_tokens, s.total_tokens AS tot_tokens "
                         + "FROM subscriptions s JOIN hotels h ON h.id = s.hotel_id JOIN subscription_plans sp ON sp.id = s.plan_id "
                         + "WHERE s.customer_id = ? AND (s.status <> 'CANCELLED' OR " + PAID + " > 0) ORDER BY s.id DESC",
                 this::line, customerId);
@@ -48,7 +50,7 @@ public class BillingService {
     @Transactional(readOnly = true)
     public List<Line> hotelLines(Long hotelId) {
         return jdbc.query("SELECT s.id, u.full_name AS party, COALESCE(u.phone, '') AS phone, sp.plan_name, s.status, s.total_amount AS total, "
-                        + PAID + " AS paid, " + pendingId() + " AS pending_id, " + pendingRef() + " AS pending_ref, h.token_hold_count AS hold "
+                        + PAID + " AS paid, " + pendingId() + " AS pending_id, " + pendingRef() + " AS pending_ref, h.token_hold_count AS hold, s.remaining_tokens AS rem_tokens, s.total_tokens AS tot_tokens "
                         + "FROM subscriptions s JOIN hotels h ON h.id = s.hotel_id JOIN users u ON u.id = s.customer_id JOIN subscription_plans sp ON sp.id = s.plan_id "
                         + "WHERE s.hotel_id = ? AND (s.status <> 'CANCELLED' OR " + PAID + " > 0) "
                         + "ORDER BY (s.total_amount - " + PAID + " > 0) DESC, s.id DESC LIMIT 300",
@@ -102,6 +104,6 @@ public class BillingService {
     private Line line(java.sql.ResultSet rs, int i) throws java.sql.SQLException {
         long pid = rs.getLong("pending_id");
         return new Line(rs.getLong("id"), rs.getString("party"), rs.getString("phone"), rs.getString("plan_name"), rs.getString("status"),
-                rs.getBigDecimal("total"), rs.getBigDecimal("paid"), rs.wasNull() ? null : pid, rs.getString("pending_ref"), rs.getInt("hold"));
+                rs.getBigDecimal("total"), rs.getBigDecimal("paid"), rs.wasNull() ? null : pid, rs.getString("pending_ref"), rs.getInt("hold"), rs.getInt("rem_tokens"), rs.getInt("tot_tokens"));
     }
 }

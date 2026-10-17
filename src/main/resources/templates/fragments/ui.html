@@ -5,7 +5,7 @@
 <!-- coloured status label; the text is looked up as status.<VALUE> -->
 <span th:fragment="badge(s)" th:if="${s != null and s != ''}" class="badge"
       th:classappend="${#strings.contains('ACTIVE,SUCCESS,SERVED,APPROVED,CREDIT,NEW', s)} ? 'text-bg-success'
-        : (${#strings.contains('PENDING,UNSET,RENEWAL', s)} ? 'text-bg-warning'
+        : (${#strings.contains('PENDING,UNSET,RENEWAL,PARTIAL', s)} ? 'text-bg-warning'
         : (${#strings.contains('EXPIRED,FAILED,CANCELLED,REJECTED,REVERSED,REVERSAL,SUSPENDED,DEACTIVATED,EXHAUSTED', s)} ? 'text-bg-danger'
         : 'text-bg-secondary'))"
       th:text="#{${'status.' + s}}">STATUS</span>

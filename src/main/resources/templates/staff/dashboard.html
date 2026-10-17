@@ -21,9 +21,7 @@
         <tr th:each="p : ${pendingPayments}">
           <td th:text="${p.customer}">C</td><td class="money text-danger" th:text="${@fmt.money(p.total.subtract(p.paid))}">0</td><td class="money" th:text="${@fmt.money(p.amount)}">0</td>
           <td><div class="d-flex flex-wrap gap-1">
-            <form th:replace="~{shared/pay-confirm :: form(${p}, 'staff')}"></form>
-            <form th:action="@{/staff/payments/{id}/reject(id=${p.id})}" method="post" th:attr="data-confirm=#{confirm.reject}">
-              <button class="btn btn-sm btn-outline-danger" type="submit" th:text="#{action.reject}">Reject</button></form>
+            <th:block th:replace="~{shared/pay-confirm :: form(${p.id}, ${p.amount}, ${p.reference}, ${p.sub_status}, 'staff')}"></th:block>
           </div></td>
         </tr>
       </tbody></table></div>

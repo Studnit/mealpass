@@ -44,6 +44,17 @@ public class RedemptionService {
         return due.signum() > 0 ? Math.max(0, Math.min(hold, totalTokens - 1)) : 0;
     }
 
+    /** How many tokens before the held ones the customer starts getting a "settle your balance" alert. */
+    public static final int BALANCE_ALERT_LEAD = 5;
+
+    /** 0 = no alert, 1 = running close to the held tokens, 2 = the last tokens are already on hold. */
+    public static int alertLevel(java.math.BigDecimal due, int hold, int totalTokens, int remaining) {
+        int held = heldTokens(due, hold, totalTokens);
+        if (held == 0 || remaining <= 0) return 0;
+        if (remaining <= held) return 2;
+        return remaining <= held + BALANCE_ALERT_LEAD ? 1 : 0;
+    }
+
     public RedemptionService(HotelRepository hotels, MealSlotRepository slots, SubscriptionRepository subs,
                              SubscriptionPlanRepository plans, MealAttendanceRepository attendance,
                              TokenTransactionRepository ledger, UserRepository users, AuditService audit,
@@ -122,6 +133,14 @@ public class RedemptionService {
         notifications.notify(c.customerId(), "REDEEMED", "notif.redeem.ok", hotel.getName(), slot.getName(), before - 1);
         String who = users.findById(c.customerId()).map(com.mealtoken.entity.User::getFullName).orElse("?");
         notifications.notify(hotel.getOwnerId(), "REDEEMED", "notif.owner.meal", who, slot.getName(), before - 1, hotel.getName());
+        // money still due and the held tokens are close: warn the customer and the owner at 5 above, 1 above and at the hold
+        java.math.BigDecimal dueNow = sub.getTotalAmount().subtract(payments.sumPaid(sub.getId()));
+        int held = heldTokens(dueNow, hotel.getTokenHoldCount(), sub.getTotalTokens());
+        int left = before - 1;
+        if (held > 0 && (left == held + BALANCE_ALERT_LEAD || left == held + 1 || left == held)) {
+            notifications.notify(c.customerId(), "BALANCE", "notif.balance.customer", hotel.getName(), left, held, dueNow);
+            notifications.notify(hotel.getOwnerId(), "BALANCE", "notif.balance.owner", who, left, dueNow, hotel.getName());
+        }
         if (before - 1 == hotel.getLowTokenThreshold() || before - 1 == 0)
             notifications.notify(c.customerId(), "LOW_TOKENS", "notif.tokens.low", before - 1, hotel.getName());
 

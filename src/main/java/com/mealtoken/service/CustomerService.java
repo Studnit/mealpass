@@ -23,6 +23,8 @@ public class CustomerService {
         Long id; Long hotelId; String hotelName; boolean hasLogo; String planName; int mealsPerDay; String status;
         String paymentStatus; LocalDate start; LocalDate expiry; int total; int used; int remaining; long daysLeft;
         List<SlotView> slots; int servedToday; boolean tokensExpire; java.math.BigDecimal totalAmount; java.math.BigDecimal paidAmount; int holdCount;
+        public int getAlertLevel() { return RedemptionService.alertLevel(getDueAmount(), holdCount, total, remaining); }
+        public int getTokensBeforeHold() { return Math.max(0, remaining - getHeldTokens()); }
         public int getHeldTokens() { return RedemptionService.heldTokens(getDueAmount(), holdCount, total); }
         public java.math.BigDecimal getDueAmount() { return totalAmount.subtract(paidAmount).max(java.math.BigDecimal.ZERO); }
         public boolean isBilled() { return totalAmount.signum() > 0; }
