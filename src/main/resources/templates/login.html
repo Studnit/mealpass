@@ -11,6 +11,7 @@
       <div class="alert alert-danger" th:if="${param.error}" th:text="#{login.error}" role="alert"></div>
       <div class="alert alert-warning" th:if="${param.throttled}" th:text="#{login.throttled}" role="alert"></div>
       <div class="alert alert-info" th:if="${param.logout}" th:text="#{login.logout}" role="status"></div>
+      <div class="alert alert-success" th:if="${verified}" th:text="#{otp.done}" role="status"></div>
       <div class="alert alert-success" th:if="${registered}" th:text="#{login.registered}" role="status"></div>
       <div class="alert alert-info" th:if="${resetSent}" th:text="#{forgot.sent}" role="status"></div>
       <div class="alert alert-success" th:if="${resetDone}" th:text="#{reset.done}" role="status"></div>
@@ -31,6 +32,7 @@
         <span th:text="#{login.noaccount}">No account?</span>
         <a th:href="@{/register}" th:text="#{register.title}">Create account</a>
       </p>
+      <p class="text-center mt-1 mb-0 small"><a th:href="@{/app}"><i class="bi bi-phone"></i> <span th:text="#{app.get.title}">Get the meal app</span></a></p>
     </div>
   </div>
 </main>

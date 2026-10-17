@@ -15,6 +15,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> lockById(@Param("id") Long id);
     Optional<Payment> findByIdAndHotelId(Long id, Long hotelId);
     Optional<Payment> findByIdAndCustomerId(Long id, Long customerId);
-    Optional<Payment> findBySubscriptionId(Long subscriptionId);
+    List<Payment> findBySubscriptionIdOrderByIdAsc(Long subscriptionId);
+    Optional<Payment> findFirstBySubscriptionIdAndStatusOrderByIdDesc(Long subscriptionId, String status);
+    @Query("select coalesce(sum(p.amount), 0) from Payment p where p.subscriptionId = :id and p.status = 'SUCCESS'")
+    java.math.BigDecimal sumPaid(@Param("id") Long subscriptionId);
     List<Payment> findByHotelIdAndStatusOrderByCreatedAt(Long hotelId, String status);
 }

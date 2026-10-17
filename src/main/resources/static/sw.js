@@ -1,6 +1,6 @@
 // Minimal service worker: makes the app installable and keeps static assets available offline.
 // Pages are always fetched from the network (they contain personal, per-user data) - never cached.
-var CACHE = 'mealtoken-static-v1';
+var CACHE = 'mealtoken-static-v2';
 var PRECACHE = ['/offline.html', '/css/app.css', '/js/app.js', '/js/scan.js', '/js/jsQR.min.js', '/icons/icon-192.png'];
 
 self.addEventListener('install', function (e) {

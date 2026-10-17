@@ -82,8 +82,6 @@ document.addEventListener('click', function (e) { if (e.target.closest('[data-pr
   var msg = document.getElementById('voiceMsg');
   if (!synth) { if (toggle) toggle.hidden = true; if (msg) msg.hidden = true; return; }
 
-  function storeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
-  function storeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private mode */ } }
   var on = storeGet('mt.sound') !== 'off', last = -1, unlocked = false;
   var replay = document.getElementById('voiceReplay'), stopBtn = document.getElementById('voiceStop');
 
@@ -91,10 +89,53 @@ document.addEventListener('click', function (e) { if (e.target.closest('[data-pr
     if (replay) replay.classList.toggle('d-none', playing);
     if (stopBtn) stopBtn.classList.toggle('d-none', !playing);
   }
+  function storeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function storeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private mode */ } }
+  // One consistent female voice on every screen (customer and owner): the same picking rule runs everywhere.
+  var FEMALE = /female|woman|heera|veena|lekha|kalpana|swara|neerja|aditi|zira|samantha|karen|tessa|moira|google (uk english female|हिन्दी|हिंदी)/i;
+  var MALE = /(^|[^a-z])male|hemant|ravi|prabhat|madhur|rishi|david|mark|james|google uk english male/i;
+  function pickVoice(lang) {
+    var all = synth.getVoices() || [];
+    var l = (lang || 'en-IN').toLowerCase(), base = l.split('-')[0];
+    var pools = [
+      all.filter(function (v) { return v.lang && v.lang.toLowerCase().replace('_', '-') === l; }),
+      all.filter(function (v) { return v.lang && v.lang.toLowerCase().indexOf(base) === 0; }),
+      all.filter(function (v) { return v.lang && v.lang.toLowerCase().indexOf('en') === 0; })
+    ];
+    for (var i = 0; i < pools.length; i++) {
+      var p = pools[i]; if (!p.length) continue;
+      return p.filter(function (v) { return FEMALE.test(v.name); })[0]
+          || p.filter(function (v) { return !MALE.test(v.name); })[0] || p[0];
+    }
+    return null;
+  }
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = function () { /* voices are looked up at speak time */ };
+
+  var SPEEDS = { slow: 0.8, normal: 0.95, fast: 1.15 };
+  var speed = storeGet('mt.speed'); if (!SPEEDS[speed]) speed = 'normal';
+  function paintSpeed() {
+    document.querySelectorAll('[data-speed]').forEach(function (b) {
+      var active = b.getAttribute('data-speed') === speed;
+      b.classList.toggle('btn-brand', active); b.classList.toggle('btn-outline-secondary', !active);
+      b.setAttribute('aria-pressed', String(active));
+    });
+  }
+  paintSpeed();
+  document.querySelectorAll('[data-speed]').forEach(function (b) {
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();                                   // keep the user menu open while choosing
+      speed = b.getAttribute('data-speed'); storeSet('mt.speed', speed); paintSpeed();
+      synth.cancel();
+      var sample = document.getElementById('voiceSample');   // let the person hear the chosen speed
+      if (sample) speak(sample.getAttribute('data-text'), sample.getAttribute('data-lang'));
+    });
+  });
+
   function speak(text, lang) {
     if (!text) return;
     var u = new SpeechSynthesisUtterance(text);
-    u.lang = lang || 'en-IN'; u.rate = 0.95;
+    u.lang = lang || 'en-IN'; u.rate = SPEEDS[speed]; u.pitch = 1.1;
+    var v = pickVoice(u.lang); if (v) u.voice = v;
     u.onstart = function () { showStop(true); };
     u.onend = u.onerror = function () { if (!synth.speaking && !synth.pending) showStop(false); };
     synth.speak(u);

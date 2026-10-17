@@ -28,7 +28,7 @@ UI languages: English, Marathi, Hindi.
 - **Notifications (in-app bell):** customer and owner are both notified when a subscription request is submitted and when a meal scan succeeds;
   customers also hear about approvals, payments, activation, low tokens, expiry and the daily menu. `ExternalNotificationSender` is the hook for SMS/WhatsApp/email.
 - **Voice announcements** (browser text-to-speech, in English/Marathi/Hindi): after a successful meal scan the customer hears *"<name>, your meal for today is confirmed. Thank you for connecting with <hotel>."*
-  and the hotel owner/staff hear *"<hotel> has received the meal request of <name> successfully."* (the same for subscription requests). Everyone can press *Stop audio* while it plays and switch voice alerts off with the speaker button in the top bar (remembered on that device).
+  and the hotel owner/staff hear *"<hotel> has received the meal request of <name> successfully."* (the same for subscription requests). Everyone can press *Stop audio* while it plays and switch voice alerts off with the speaker button in the top bar (remembered on that device). The same female voice is used on both customer and owner screens (the browser picks a female voice for the language when the device has one), and the speed (Slow / Normal / Fast) is chosen in the user menu.
   Browsers only allow speech after a tap on the page; a *Play audio* button is shown as a fallback. Marathi/Hindi voices must be installed on the device, otherwise the browser reads with an English voice.
 - **Reports** (filter, search, sort, paginate, CSV export with spreadsheet-formula protection), dashboards with charts, notifications, audit logs.
 - **Security:** BCrypt, CSRF on every form, session-fixation protection, login/redemption rate limiting, non-guessable QR identifiers (256-bit random),
@@ -115,3 +115,17 @@ For production put the app behind a TLS-terminating reverse proxy and set `serve
 - A customer can renew only when no ACTIVE subscription exists at that hotel.
 - Payment gateway support is a generic signed-webhook verifier, not a provider SDK.
 - Rate limiting is in-memory (per instance); use a shared store if you scale horizontally.
+
+## Billing
+
+* Each subscription has a fixed **total** (the plan price at approval). **Paid** is the sum of confirmed payments and **Remaining** is total minus paid.
+* Customers see Paid / Remaining on every subscription card and on **Billing** (`/customer/billing`), with their payment history.
+* Owners (and staff allowed to confirm payments) use **Billing** (`/owner/billing`): totals billed, collected, outstanding and collected today, plus a *Receive* form per subscription.
+* A part payment records the amount received and keeps the balance as a new pending payment. The subscription activates when fully paid, or immediately if **Activate now** is ticked. Over-payment is rejected.
+* Migration `V4__billing.sql` adds `subscriptions.total_amount` and backfills it from existing payments.
+
+## Sign-up verification, hotel finder and the app QR
+
+* **Verification code.** After registering, a 6 digit code is sent to the user's email (set `SPRING_MAIL_HOST` and friends) and to their mobile (set `OTP_SMS_WEBHOOK_URL`, any gateway that accepts `{"to","message"}` JSON). The user must enter it before signing in. Codes expire in 10 minutes, allow 5 wrong tries and can be re-sent once a minute. With no email or SMS configured, the code is written to the server log (development only). Set `OTP_REQUIRED=false` to turn the check off. Accounts created before this version, and hotels created by the Super Admin, count as verified.
+* **City and area.** Hotel owners enter a city and an area when they register (editable under *My hotel*). Customers filter *Find hotels* by city, area and name, open a hotel and subscribe.
+* **App QR.** `/app` is a public page with Install, Create account and Sign in buttons and one generic QR code (`/app/qr.png`, printable at `/app/poster`). Owners can print it from *QR code*; when it carries their city and area, new customers land on the hotel finder already filtered to that place. Migration `V5__otp_city_area.sql` adds the new columns and the `otp_codes` table.

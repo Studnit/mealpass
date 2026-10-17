@@ -134,11 +134,12 @@ a:focus-visible { outline: 3px solid rgba(22,106,70,.5); outline-offset: 2px; bo
 }
 
 /* ===== Top bar: menu + brand on the left, actions together on the right, always one row ===== */
-.app-topbar { flex-wrap: nowrap; gap: .5rem; padding-top: .45rem; padding-bottom: .45rem; }
+.navbar.app-topbar { flex-wrap: nowrap !important; flex-direction: row; align-items: center; gap: .5rem; padding-top: .45rem; padding-bottom: .45rem; }
 .app-topbar > .btn { flex-shrink: 0; margin-right: 0 !important; }
 .app-brand { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; display: flex; align-items: center; gap: .35rem; overflow: hidden; white-space: nowrap; font-size: 1.15rem; }
 .app-brand span { overflow: hidden; text-overflow: ellipsis; }
-.app-actions { margin-left: auto; }
+.app-actions { margin-left: auto; flex-wrap: nowrap !important; }
+.app-topbar .navbar-nav { flex-direction: row; }
 .app-actions .btn { min-width: 38px; padding-left: .6rem; padding-right: .6rem; }
 @media (max-width: 575.98px) {
   .app-brand { font-size: .95rem; letter-spacing: -.02em; }
@@ -156,3 +157,9 @@ a:focus-visible { outline: 3px solid rgba(22,106,70,.5); outline-offset: 2px; bo
 .veg-dot.nonveg { border-color: #b3261e; }
 .veg-dot.nonveg::after { background: #b3261e; }
 .min-w-0 { min-width: 0; }
+
+/* ===== Billing ===== */
+.bill-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-md); padding: .6rem .5rem; text-align: center; }
+.bill-strip small { display: block; font-size: .75rem; }
+.bill-strip strong { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.money { font-variant-numeric: tabular-nums; white-space: nowrap; }

@@ -22,7 +22,9 @@ public class CustomerService {
     public static class SubView {
         Long id; Long hotelId; String hotelName; boolean hasLogo; String planName; int mealsPerDay; String status;
         String paymentStatus; LocalDate start; LocalDate expiry; int total; int used; int remaining; long daysLeft;
-        List<SlotView> slots; int servedToday; boolean tokensExpire;
+        List<SlotView> slots; int servedToday; boolean tokensExpire; java.math.BigDecimal totalAmount; java.math.BigDecimal paidAmount;
+        public java.math.BigDecimal getDueAmount() { return totalAmount.subtract(paidAmount).max(java.math.BigDecimal.ZERO); }
+        public boolean isBilled() { return totalAmount.signum() > 0; }
         public int getPercentUsed() { return total == 0 ? 0 : (int) Math.round(used * 100.0 / total); }
         public boolean isRedeemable() { return "ACTIVE".equals(status) && remaining > 0 && servedToday < mealsPerDay; }
     }
@@ -47,7 +49,8 @@ public class CustomerService {
     public List<SubView> subscriptions(Long customerId, Long onlyHotelId) {
         String sql = "SELECT s.id, s.hotel_id, h.name AS hotel_name, h.timezone AS tz, (h.logo_path IS NOT NULL) AS has_logo, "
                 + "sp.plan_name, sp.meals_per_day, sp.tokens_expire_with_subscription AS tokens_expire, s.status, s.payment_status, "
-                + "s.start_date, s.expiry_date, s.total_tokens, s.used_tokens, s.remaining_tokens "
+                + "s.start_date, s.expiry_date, s.total_tokens, s.used_tokens, s.remaining_tokens, s.total_amount, "
+                + "COALESCE((SELECT SUM(p.amount) FROM payments p WHERE p.subscription_id = s.id AND p.status = 'SUCCESS'), 0) AS paid_amount "
                 + "FROM subscriptions s JOIN hotels h ON h.id = s.hotel_id JOIN subscription_plans sp ON sp.id = s.plan_id "
                 + "WHERE s.customer_id = ? " + (onlyHotelId != null ? "AND s.hotel_id = ? " : "") + "ORDER BY s.created_at DESC, s.id DESC";
         List<Map<String, Object>> rows = onlyHotelId != null ? jdbc.queryForList(sql, customerId, onlyHotelId)
@@ -78,7 +81,8 @@ public class CustomerService {
                     (String) r.get("plan_name"), ((Number) r.get("meals_per_day")).intValue(), status,
                     (String) r.get("payment_status"), start, expiry, ((Number) r.get("total_tokens")).intValue(),
                     ((Number) r.get("used_tokens")).intValue(), ((Number) r.get("remaining_tokens")).intValue(),
-                    left, slots, served, Boolean.TRUE.equals(r.get("tokens_expire"))));
+                    left, slots, served, Boolean.TRUE.equals(r.get("tokens_expire")),
+                    (java.math.BigDecimal) r.get("total_amount"), (java.math.BigDecimal) r.get("paid_amount")));
         }
         return out;
     }
@@ -104,13 +108,25 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> activeHotels(String q) {
+    public List<Map<String, Object>> activeHotels(String q, String city, String area) {
         String like = "%" + (q == null ? "" : q.trim().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")) + "%";
         return jdbc.queryForList(
-                "SELECT h.id, h.name, COALESCE(h.address, '') AS address, COALESCE(h.phone, '') AS phone, COALESCE(h.operating_hours, '') AS hours, "
-                        + "(h.logo_path IS NOT NULL) AS has_logo FROM hotels h WHERE h.status = 'ACTIVE' "
-                        + "AND (h.name ILIKE ? OR COALESCE(h.address, '') ILIKE ?) ORDER BY h.name LIMIT 100", like, like);
+                "SELECT h.id, h.name, COALESCE(h.address, '') AS address, COALESCE(h.city, '') AS city, COALESCE(h.area, '') AS area, "
+                        + "COALESCE(h.phone, '') AS phone, COALESCE(h.operating_hours, '') AS hours, (h.logo_path IS NOT NULL) AS has_logo "
+                        + "FROM hotels h WHERE h.status = 'ACTIVE' "
+                        + "AND (h.name ILIKE ? OR COALESCE(h.address, '') ILIKE ? OR COALESCE(h.area, '') ILIKE ? OR COALESCE(h.city, '') ILIKE ?) "
+                        + "AND (? = '' OR lower(h.city) = lower(?)) AND (? = '' OR lower(h.area) = lower(?)) "
+                        + "ORDER BY h.name LIMIT 100", like, like, like, like, nz(city), nz(city), nz(area), nz(area));
     }
+
+    /** Distinct city / area pairs of live hotels, for the finder's drop-downs. */
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> locations() {
+        return jdbc.queryForList("SELECT DISTINCT trim(h.city) AS city, COALESCE(trim(h.area), '') AS area FROM hotels h "
+                + "WHERE h.status = 'ACTIVE' AND h.city IS NOT NULL AND trim(h.city) <> '' ORDER BY 1, 2");
+    }
+
+    private static String nz(String s) { return s == null ? "" : s.trim(); }
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> pendingPayments(Long customerId) {

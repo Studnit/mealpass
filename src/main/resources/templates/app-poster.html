@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/layout :: head(#{app.get.title})}"></head>
+<body>
+<main class="container text-center py-5" style="max-width: 560px;">
+  <h1 class="display-6 fw-bold text-brand" th:text="#{app.name}">Meal Token System</h1>
+  <p class="fs-5" th:text="#{app.poster.line}">Scan to install the app, find a hotel and subscribe.</p>
+  <p class="fs-5" th:if="${city != ''}"><i class="bi bi-geo-alt"></i> <span th:text="${area != '' ? area + ', ' + city : city}">Pune</span></p>
+  <img class="img-fluid my-3" style="max-width: 420px" th:src="@{/app/qr.png(city=${city != ''} ? ${city} : null, area=${area != ''} ? ${area} : null)}" th:alt="#{app.get.title}">
+  <p class="text-muted small text-break" th:text="${appUrl}">url</p>
+  <div class="no-print mt-3 d-flex gap-2 justify-content-center">
+    <button class="btn btn-brand" type="button" onclick="window.print()"><i class="bi bi-printer"></i> <span th:text="#{qr.print}">Print</span></button>
+    <button class="btn btn-outline-secondary" type="button" onclick="window.close()"><i class="bi bi-x-lg"></i> <span th:text="#{action.close}">Close</span></button>
+  </div>
+</main>
+</body>
+</html>

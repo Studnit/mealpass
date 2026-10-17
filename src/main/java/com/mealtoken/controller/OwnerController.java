@@ -64,10 +64,11 @@ public class OwnerController {
 
     @PostMapping("/hotel")
     public String saveHotel(@RequestParam String name, @RequestParam(required = false) String address,
+                            @RequestParam(required = false) String city, @RequestParam(required = false) String area,
                             @RequestParam(required = false) String phone, @RequestParam(required = false) String operatingHours,
                             @RequestParam String timezone, @RequestParam(defaultValue = "false") boolean enforceMealWindow,
                             @RequestParam(defaultValue = "5") int lowTokenThreshold, RedirectAttributes ra) {
-        hotelService.updateProfile(access.current(), name, address, phone, operatingHours, timezone, enforceMealWindow, lowTokenThreshold);
+        hotelService.updateProfile(access.current(), name, address, city, area, phone, operatingHours, timezone, enforceMealWindow, lowTokenThreshold);
         ra.addFlashAttribute("ok", "ok.saved");
         return "redirect:/owner/hotel";
     }

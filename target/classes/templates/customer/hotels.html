@@ -3,9 +3,24 @@
 <body>
 <section>
   <h1 class="h4 mb-3" th:text="#{nav.hotels}">Find hotels</h1>
-  <form method="get" th:action="@{/customer/hotels}" class="input-group mb-3" data-multi>
-    <input class="form-control" name="q" th:value="${q}" maxlength="100" th:placeholder="#{table.search}" th:attr="aria-label=#{table.search}">
-    <button class="btn btn-brand" type="submit"><i class="bi bi-search"></i> <span class="visually-hidden" th:text="#{table.search}">Search</span></button>
+  <form method="get" th:action="@{/customer/hotels}" class="row g-2 mb-3" data-multi id="finder">
+    <div class="col-6 col-md-3">
+      <select class="form-select" name="city" id="fCity" th:attr="aria-label=#{hotel.city}">
+        <option value="" th:text="#{finder.allcities}">All cities</option>
+        <option th:each="c : ${cities}" th:value="${c}" th:text="${c}" th:selected="${#strings.equalsIgnoreCase(c, city)}"></option>
+      </select>
+    </div>
+    <div class="col-6 col-md-3">
+      <select class="form-select" name="area" id="fArea" th:attr="aria-label=#{hotel.area}">
+        <option value="" th:text="#{finder.allareas}">All areas</option>
+        <option th:each="l : ${locations}" th:if="${l.area != ''}" th:value="${l.area}" th:attr="data-city=${l.city}" th:text="${l.area}" th:selected="${#strings.equalsIgnoreCase(l.area, area)}"></option>
+      </select>
+    </div>
+    <div class="col-12 col-md-6"><div class="input-group">
+      <input class="form-control" name="q" th:value="${q}" maxlength="100" th:placeholder="#{table.search}" th:attr="aria-label=#{table.search}">
+      <button class="btn btn-brand" type="submit"><i class="bi bi-search"></i> <span class="visually-hidden" th:text="#{table.search}">Search</span></button>
+      <a class="btn btn-outline-secondary" th:href="@{/customer/hotels(city='',area='')}" th:attr="aria-label=#{finder.clear}"><i class="bi bi-x-lg"></i></a>
+    </div></div>
   </form>
   <div class="text-center text-muted py-5" th:if="${#lists.isEmpty(hotels)}"><i class="bi bi-inbox fs-1 d-block"></i><span th:text="#{table.empty}">Nothing</span></div>
   <div class="row g-3">
@@ -14,12 +29,28 @@
         <div class="d-flex gap-3 align-items-center">
           <span th:replace="~{fragments/ui :: logo(${h.id}, ${h.has_logo}, 56)}"></span>
           <div><h2 class="h6 m-0" th:text="${h.name}">Hotel</h2>
+            <small class="text-muted d-block"><i class="bi bi-geo-alt"></i> <span th:text="${h.area != '' ? h.area + ', ' + h.city : h.city}">Area, City</span></small>
             <small class="text-muted d-block" th:text="${h.address}">Address</small>
             <small class="text-muted" th:text="${h.hours}">Hours</small></div>
         </div>
       </a>
     </div>
   </div>
+<script>
+  (function () {
+    var city = document.getElementById('fCity'), area = document.getElementById('fArea');
+    if (!city || !area) return;
+    function sync() {
+      Array.prototype.forEach.call(area.options, function (o) {
+        var show = !o.dataset.city || !city.value || o.dataset.city.toLowerCase() === city.value.toLowerCase();
+        o.hidden = !show; o.disabled = !show;
+      });
+      if (area.selectedOptions[0] && area.selectedOptions[0].disabled) area.value = '';
+    }
+    city.addEventListener('change', function () { area.value = ''; sync(); });
+    sync();
+  })();
+</script>
 </section>
 </body>
 </html>

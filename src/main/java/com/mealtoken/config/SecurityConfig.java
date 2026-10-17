@@ -24,7 +24,7 @@ public class SecurityConfig {
         http
             .addFilterBefore(limiter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(a -> a
-                .requestMatchers("/login", "/register", "/forgot", "/reset/**", "/css/**", "/js/**", "/img/**", "/error",
+                .requestMatchers("/login", "/register", "/verify-otp", "/app", "/app/**", "/forgot", "/reset/**", "/css/**", "/js/**", "/img/**", "/error",
                                  "/hotel-logo/**", "/actuator/health", "/webhooks/**", "/manifest.webmanifest", "/sw.js", "/offline.html", "/icons/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/owner/**").hasRole("OWNER")
@@ -36,7 +36,13 @@ public class SecurityConfig {
             .formLogin(f -> f
                 .loginPage("/login")
                 .successHandler(success)   // returns to the page the user wanted (e.g. a scanned QR URL), else /home
-                .failureUrl("/login?error"))
+                .failureHandler((req, res, ex) -> {
+                    if (ex instanceof org.springframework.security.authentication.DisabledException) {   // account not verified yet
+                        String u = req.getParameter("username");
+                        res.sendRedirect(req.getContextPath() + "/verify-otp?unverified&email="
+                                + java.net.URLEncoder.encode(u == null ? "" : u.trim(), java.nio.charset.StandardCharsets.UTF_8));
+                    } else res.sendRedirect(req.getContextPath() + "/login?error");
+                }))
             .logout(l -> l.logoutSuccessUrl("/login?logout").deleteCookies("JSESSIONID"))
             .sessionManagement(s -> s.sessionFixation().migrateSession())
             // Webhooks are authenticated by an HMAC signature instead of a browser CSRF token.

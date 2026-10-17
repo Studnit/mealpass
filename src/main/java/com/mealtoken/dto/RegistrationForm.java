@@ -22,6 +22,12 @@ public class RegistrationForm {
     @Size(max = 150)
     private String hotelName;
 
+    @Size(max = 80)
+    private String city;
+
+    @Size(max = 80)
+    private String area;
+
     public String getFullName() { return fullName; }
     public void setFullName(String v) { this.fullName = v; }
     public String getEmail() { return email; }
@@ -32,6 +38,10 @@ public class RegistrationForm {
     public void setPassword(String v) { this.password = v; }
     public String getAccountType() { return accountType; }
     public void setAccountType(String v) { this.accountType = v; }
+    public String getCity() { return city; }
+    public void setCity(String v) { this.city = v; }
+    public String getArea() { return area; }
+    public void setArea(String v) { this.area = v; }
     public String getHotelName() { return hotelName; }
     public void setHotelName(String v) { this.hotelName = v; }
 }

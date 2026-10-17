@@ -38,10 +38,17 @@
             <option value="OWNER" th:text="#{register.owner}">Hotel owner</option>
           </select>
         </div>
-        <div class="mb-3" id="hotelNameGroup" style="display:none">
-          <label for="hotelName" class="form-label" th:text="#{register.hotelName}">Hotel name</label>
-          <input id="hotelName" th:field="*{hotelName}" class="form-control">
+        <div id="hotelNameGroup" style="display:none">
+          <div class="mb-3">
+            <label for="hotelName" class="form-label" th:text="#{register.hotelName}">Hotel name</label>
+            <input id="hotelName" th:field="*{hotelName}" class="form-control">
+          </div>
+          <div class="row">
+            <div class="col-6 mb-3"><label for="city" class="form-label" th:text="#{hotel.city}">City</label><input id="city" th:field="*{city}" class="form-control" maxlength="80"></div>
+            <div class="col-6 mb-3"><label for="area" class="form-label" th:text="#{hotel.area}">Area</label><input id="area" th:field="*{area}" class="form-control" maxlength="80"></div>
+          </div>
         </div>
+        <p class="small text-muted" th:text="#{otp.register.note}">We will send a verification code to your email and mobile.</p>
         <button type="submit" class="btn btn-brand w-100" th:text="#{register.submit}">Register</button>
       </form>
       <p class="text-center mt-3 mb-0 small">

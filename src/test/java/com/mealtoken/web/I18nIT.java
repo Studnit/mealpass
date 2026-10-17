@@ -40,7 +40,7 @@ class I18nIT extends AbstractIntegrationTest {
             .getContentAsString();
 
             assertThat(html)
-                    .as("Login page should render correctly for language: " + lang)
+                    .as("Login page for language: " + lang)
                     .doesNotContain("??");
         }
 
@@ -61,13 +61,13 @@ class I18nIT extends AbstractIntegrationTest {
         .getContentAsString();
 
         assertThat(mr)
-                .as("Marathi and English login pages should differ")
                 .isNotEqualTo(en)
                 .containsPattern("[\\u0900-\\u097F]");
     }
 
     @Test
-    void everyEnglishKeyHasMarathiAndHindiTranslations() throws Exception {
+    void everyEnglishKeyHasMarathiAndHindiTranslations()
+            throws Exception {
 
         Properties en = load("messages.properties");
 
@@ -79,11 +79,10 @@ class I18nIT extends AbstractIntegrationTest {
             Properties other = load(file);
 
             assertThat(other.stringPropertyNames())
-                    .as("Missing translations in " + file)
+                    .as("Translation keys in " + file)
                     .containsAll(en.stringPropertyNames());
         }
 
-        // Get a String key instead of an Object.
         String firstKey = en.stringPropertyNames()
                 .stream()
                 .findFirst()
@@ -112,7 +111,7 @@ class I18nIT extends AbstractIntegrationTest {
 
         if (resource == null) {
             throw new IllegalStateException(
-                    "Properties file not found in classpath: " + name
+                    "Properties file not found: " + name
             );
         }
 

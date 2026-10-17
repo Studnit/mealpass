@@ -22,6 +22,15 @@
       </div>
     </div>
     <div class="col-12 col-md-6">
+      <div class="card card-body mb-3">
+        <h2 class="h6" th:text="#{app.get.title}">Get the meal app</h2>
+        <p class="small text-muted" th:text="#{app.owner.help}">One code for everyone: customers install the app, sign up and find your hotel by city and area.</p>
+        <div class="actions stack">
+          <a class="btn btn-outline-secondary" th:href="@{/app(city=${hotel.city}, area=${hotel.area})}" target="_blank" rel="noopener"><i class="bi bi-qr-code"></i><span th:text="#{app.owner.view}">View app QR</span></a>
+          <a class="btn btn-outline-secondary" th:href="@{/app/poster(city=${hotel.city}, area=${hotel.area})}" target="_blank" rel="noopener"><i class="bi bi-printer"></i><span th:text="#{qr.print}">Print</span></a>
+        </div>
+        <p class="small text-warning mb-0 mt-2" th:if="${hotel.city == null or hotel.city == ''}"><a th:href="@{/owner/hotel}" th:text="#{app.owner.setcity}">Set your city and area</a></p>
+      </div>
       <div class="card card-body">
         <p th:text="#{qr.help}">Customers scan this code, sign in, and confirm the meal. The code holds no personal data.</p>
         <div class="actions stack">

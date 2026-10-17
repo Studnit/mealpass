@@ -15,6 +15,12 @@
         <div class="mb-3"><label class="form-label" for="address" th:text="#{hotel.address}">Address</label>
           <input class="form-control" id="address" name="address" maxlength="300" th:value="${hotel.address}"></div>
         <div class="row">
+          <div class="col-md-6 mb-3"><label class="form-label" for="city" th:text="#{hotel.city}">City</label>
+            <input class="form-control" id="city" name="city" maxlength="80" required th:value="${hotel.city}"></div>
+          <div class="col-md-6 mb-3"><label class="form-label" for="area" th:text="#{hotel.area}">Area</label>
+            <input class="form-control" id="area" name="area" maxlength="80" th:value="${hotel.area}" th:placeholder="#{hotel.area.help}"></div>
+        </div>
+        <div class="row">
           <div class="col-md-6 mb-3"><label class="form-label" for="phone" th:text="#{register.phone}">Phone</label>
             <input class="form-control" id="phone" name="phone" maxlength="20" th:value="${hotel.phone}"></div>
           <div class="col-md-6 mb-3"><label class="form-label" for="oh" th:text="#{hotel.hours}">Operating hours</label>

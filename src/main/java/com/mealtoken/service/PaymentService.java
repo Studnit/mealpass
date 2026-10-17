@@ -48,9 +48,20 @@ public class PaymentService {
         notifications.notify(h.getOwnerId(), "PAYMENT", "notif.pay.submitted", p.getAmount());
     }
 
-    /** Cash / UPI confirmed by the owner or an authorised staff member. */
+    /** Cash / UPI confirmed for the full amount by the owner or an authorised staff member. */
     @Transactional
     public void confirmManual(HotelContext ctx, Long paymentId, String method, String reference) {
+        confirmManual(ctx, paymentId, method, reference, null, true);
+    }
+
+    /**
+     * Records money received against a PENDING payment (which always equals the amount still due).
+     * {@code received == null} or equal to the due amount settles it. A smaller amount is a part payment: this record is
+     * settled for what was received and a new PENDING record carries the balance. A part payment starts the subscription
+     * only when {@code activateNow} is true; a full payment always does.
+     */
+    @Transactional
+    public void confirmManual(HotelContext ctx, Long paymentId, String method, String reference, BigDecimal received, boolean activateNow) {
         if (!ctx.owner() && !ctx.canConfirmPayments()) throw new BusinessException("error.forbidden");
         String m = method == null ? "" : method.trim().toUpperCase();
         if (!MANUAL_METHODS.contains(m)) throw new BusinessException("error.payment.method");
@@ -60,10 +71,50 @@ public class PaymentService {
         Payment p = payments.lockById(paymentId).orElseThrow(() -> new BusinessException("error.notfound"));
         if (!p.getHotelId().equals(ctx.hotelId())) throw new BusinessException("error.notfound");
         if (!"PENDING".equals(p.getStatus())) throw new BusinessException("error.payment.state");
+        BigDecimal due = p.getAmount();
+        BigDecimal got = received == null ? due : received.setScale(2, java.math.RoundingMode.HALF_UP);
+        if (got.signum() <= 0 || got.compareTo(due) > 0) throw new BusinessException("error.payment.amount");
+        boolean full = got.compareTo(due) == 0;
+        String originalMethod = p.getPaymentMethod();
+        if (!full) p.setAmount(got);
         markPaid(p, m, ref, ctx.userId(), null);
-        audit.log(ctx.userId(), ctx.hotelId(), "PAYMENT_CONFIRMED", "Payment", p.getId(), "method=" + m + " amount=" + p.getAmount());
-        notifications.notify(p.getCustomerId(), "PAYMENT", "notif.pay.confirmed", p.getAmount(), ctx.hotel().getName());
-        if (p.getSubscriptionId() != null) subscriptions.activate(p.getSubscriptionId(), ctx.userId());
+        if (!full) {                                         // the balance stays payable as a new PENDING record
+            Payment rest = new Payment();
+            rest.setCustomerId(p.getCustomerId()); rest.setHotelId(p.getHotelId()); rest.setSubscriptionId(p.getSubscriptionId());
+            rest.setAmount(due.subtract(got)); rest.setPaymentMethod(originalMethod);
+            payments.saveAndFlush(rest);
+        }
+        audit.log(ctx.userId(), ctx.hotelId(), full ? "PAYMENT_CONFIRMED" : "PAYMENT_PART_RECEIVED", "Payment", p.getId(),
+                "method=" + m + " amount=" + got + (full ? "" : " balance=" + due.subtract(got)));
+        if (full) notifications.notify(p.getCustomerId(), "PAYMENT", "notif.pay.confirmed", got, ctx.hotel().getName());
+        else notifications.notify(p.getCustomerId(), "PAYMENT", "notif.pay.partial", got, ctx.hotel().getName(), due.subtract(got));
+        if (p.getSubscriptionId() != null) {
+            if ((full || activateNow) && subscriptions.isPending(p.getSubscriptionId()))
+                subscriptions.activate(p.getSubscriptionId(), ctx.userId());
+            subscriptions.syncPaymentStatus(p.getSubscriptionId());
+        }
+    }
+
+    /**
+     * Owner/staff records a payment against a subscription's outstanding balance (creating the PENDING record if the
+     * previous one was rejected). Used by the Billing screen. Only the hotel's own subscriptions can be addressed.
+     */
+    @Transactional
+    public void receive(HotelContext ctx, Long subscriptionId, BigDecimal amount, String method, String reference, boolean activateNow) {
+        if (!ctx.owner() && !ctx.canConfirmPayments()) throw new BusinessException("error.forbidden");
+        var s = subscriptions.findForHotel(ctx.hotelId(), subscriptionId);
+        if ("CANCELLED".equals(s.getStatus())) throw new BusinessException("error.payment.state");
+        BigDecimal due = s.getTotalAmount().subtract(payments.sumPaid(subscriptionId));
+        if (due.signum() <= 0) throw new BusinessException("error.payment.state");
+        Payment pending = payments.findFirstBySubscriptionIdAndStatusOrderByIdDesc(subscriptionId, "PENDING").orElseGet(() -> {
+            Payment n = new Payment();
+            n.setCustomerId(s.getCustomerId()); n.setHotelId(s.getHotelId()); n.setSubscriptionId(subscriptionId);
+            n.setPaymentMethod("UNSET");
+            return n;
+        });
+        pending.setAmount(due);                             // the open record always equals what is still owed
+        pending = payments.saveAndFlush(pending);
+        confirmManual(ctx, pending.getId(), method, reference, amount, activateNow);
     }
 
     @Transactional
@@ -92,7 +143,10 @@ public class PaymentService {
             audit.log(null, p.getHotelId(), "PAYMENT_CONFIRMED", "Payment", p.getId(), "gateway=" + provider);
             Hotel h = hotels.findById(p.getHotelId()).orElseThrow();
             notifications.notify(p.getCustomerId(), "PAYMENT", "notif.pay.confirmed", p.getAmount(), h.getName());
-            if (p.getSubscriptionId() != null) subscriptions.activate(p.getSubscriptionId(), null);
+            if (p.getSubscriptionId() != null) {
+                if (subscriptions.isPending(p.getSubscriptionId())) subscriptions.activate(p.getSubscriptionId(), null);
+                subscriptions.syncPaymentStatus(p.getSubscriptionId());
+            }
         } else {
             fail(p, null);
             audit.log(null, p.getHotelId(), "PAYMENT_FAILED", "Payment", p.getId(), "gateway=" + provider);
@@ -102,7 +156,7 @@ public class PaymentService {
     /** Id of the PENDING payment attached to a subscription (used by data seeding and tests). */
     @Transactional(readOnly = true)
     public Long findPendingIdFor(Long subscriptionId) {
-        return payments.findBySubscriptionId(subscriptionId).filter(p -> "PENDING".equals(p.getStatus()))
+        return payments.findFirstBySubscriptionIdAndStatusOrderByIdDesc(subscriptionId, "PENDING")
                 .map(Payment::getId).orElseThrow(() -> new BusinessException("error.notfound"));
     }
 

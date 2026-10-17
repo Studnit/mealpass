@@ -15,7 +15,10 @@
     <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{dash.revenue}, ${@fmt.money(totalRevenue)}, 'currency-rupee')}"></div></div>
     <div class="col-6 col-lg-3"><div th:replace="~{fragments/ui :: stat(#{admin.meals.24h}, ${mealsToday}, 'egg-fried')}"></div></div>
   </div>
-  <a class="btn btn-brand" th:href="@{/admin/hotels(status=PENDING)}"><i class="bi bi-check2-square"></i> <span th:text="#{admin.review.pending}">Review pending hotels</span></a>
+  <div class="actions">
+    <a class="btn btn-brand" th:href="@{/admin/hotels(status=PENDING)}"><i class="bi bi-check2-square"></i> <span th:text="#{admin.review.pending}">Review pending hotels</span></a>
+    <a class="btn btn-outline-secondary" th:href="@{/app}" target="_blank" rel="noopener"><i class="bi bi-qr-code"></i> <span th:text="#{app.get.title}">Get the meal app</span></a>
+  </div>
 </section>
 </body>
 </html>

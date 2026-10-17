@@ -25,7 +25,7 @@ public class PlanService {
     public SubscriptionPlan save(HotelContext ctx, Long planId, String name, int mealsPerDay, int totalTokens,
                                  BigDecimal price, int validityDays, boolean tokensExpire, boolean active) {
         if (!ctx.owner()) throw new BusinessException("error.forbidden");
-        if (name == null || name.isBlank() || name.length() > 100 || mealsPerDay < 1 || mealsPerDay > 4
+        if (name == null || name.isBlank() || name.length() > 100 || mealsPerDay < 1 || mealsPerDay > 2
                 || totalTokens < 1 || totalTokens > 1000 || validityDays < 1 || validityDays > 730
                 || price == null || price.signum() < 0 || price.compareTo(new BigDecimal("10000000")) > 0)
             throw new BusinessException("error.plan.invalid");

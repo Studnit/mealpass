@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/layout :: head(#{otp.title})}"></head>
+<body class="auth-bg">
+<nav th:replace="~{fragments/layout :: topbar}"></nav>
+<main class="container py-5" style="max-width: 440px;">
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <h1 class="h4 mb-2" th:text="#{otp.title}">Verify your account</h1>
+      <p class="text-muted" th:text="#{otp.help}">Enter the 6 digit code we sent to your email and mobile.</p>
+      <div class="alert alert-warning" th:if="${param.unverified}" th:text="#{otp.unverified}" role="alert"></div>
+      <div class="alert alert-success" th:if="${otpSent}" th:text="#{otp.sent}" role="status"></div>
+      <div class="alert alert-danger" th:if="${errorKey}" th:text="#{${errorKey}}" role="alert"></div>
+
+      <form th:action="@{/verify-otp}" method="post">
+        <div class="mb-3">
+          <label class="form-label" for="email" th:text="#{login.email}">Email</label>
+          <input class="form-control" type="email" id="email" name="email" th:value="${email}" required autocomplete="username">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="code" th:text="#{otp.code}">Verification code</label>
+          <input class="form-control form-control-lg text-center" id="code" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
+                 autocomplete="one-time-code" required autofocus style="letter-spacing:.4em">
+        </div>
+        <button class="btn btn-brand w-100" type="submit"><i class="bi bi-shield-check"></i> <span th:text="#{otp.verify}">Verify</span></button>
+      </form>
+      <form th:action="@{/verify-otp/resend}" method="post" class="mt-2">
+        <input type="hidden" name="email" th:value="${email}">
+        <button class="btn btn-outline-secondary w-100" type="submit"><i class="bi bi-arrow-repeat"></i> <span th:text="#{otp.resend}">Send a new code</span></button>
+      </form>
+      <p class="text-center mt-3 mb-0 small"><a class="back-link" th:href="@{/login}"><i class="bi bi-arrow-left"></i><span th:text="#{forgot.back}">Back to sign in</span></a></p>
+    </div>
+  </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

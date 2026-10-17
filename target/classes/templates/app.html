@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/layout :: head(#{app.get.title})}"></head>
+<body class="auth-bg">
+<nav th:replace="~{fragments/layout :: topbar}"></nav>
+<main class="container py-4" style="max-width: 480px;">
+  <div class="card shadow-sm border-0 text-center">
+    <div class="card-body p-4">
+      <i class="bi bi-qr-code-scan display-4 text-brand"></i>
+      <h1 class="h4 mt-2" th:text="#{app.get.title}">Get the meal app</h1>
+      <p class="text-muted" th:text="#{app.get.help}">Install the app, create an account, pick a hotel near you and subscribe.</p>
+      <p class="badge text-bg-light fs-6" th:if="${city != ''}"><i class="bi bi-geo-alt"></i> <span th:text="${area != '' ? area + ', ' + city : city}">Pune</span></p>
+
+      <div class="d-grid gap-2 my-3">
+        <button id="installApp" type="button" class="btn btn-brand btn-lg d-none" th:attr="data-ios-hint=#{install.ios}"><i class="bi bi-download"></i> <span th:text="#{install.button}">Install app</span></button>
+        <a class="btn btn-brand" th:href="@{/register}"><i class="bi bi-person-plus"></i> <span th:text="#{register.title}">Create account</span></a>
+        <a class="btn btn-outline-secondary" th:href="@{/login}"><i class="bi bi-box-arrow-in-right"></i> <span th:text="#{login.submit}">Sign in</span></a>
+      </div>
+      <p class="small text-muted mb-1" th:text="#{app.get.ios}">On iPhone: tap Share, then Add to Home Screen.</p>
+      <hr>
+      <p class="small text-muted" th:text="#{app.get.share}">Share this code with friends so they can join too.</p>
+      <img class="qr-img" th:src="@{/app/qr.png(city=${city != ''} ? ${city} : null, area=${area != ''} ? ${area} : null)}" th:alt="#{app.get.title}">
+      <div class="actions justify-content-center split stack no-print mt-2">
+        <a class="btn btn-outline-secondary" th:href="@{/app/qr.png(download=true, city=${city != ''} ? ${city} : null, area=${area != ''} ? ${area} : null)}"><i class="bi bi-download"></i> <span th:text="#{qr.download}">Download</span></a>
+        <a class="btn btn-outline-secondary" th:href="@{/app/poster(city=${city != ''} ? ${city} : null, area=${area != ''} ? ${area} : null)}" target="_blank" rel="noopener"><i class="bi bi-printer"></i> <span th:text="#{qr.print}">Print</span></a>
+      </div>
+    </div>
+  </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

@@ -58,8 +58,19 @@ public class CustomerController {
     // ------------------------------------------------------------------ discovery & subscribing
 
     @GetMapping("/hotels")
-    public String hotels(@RequestParam(required = false) String q, Model m) {
-        m.addAttribute("hotels", customers.activeHotels(q));
+    public String hotels(@RequestParam(required = false) String q, @RequestParam(required = false) String city,
+                         @RequestParam(required = false) String area, jakarta.servlet.http.HttpSession session, Model m) {
+        // A customer who arrived through a hotel's app QR starts with that hotel's city and area selected.
+        if (city == null && area == null && session.getAttribute(AppController.SESSION_CITY) != null) {
+            city = (String) session.getAttribute(AppController.SESSION_CITY);
+            area = (String) session.getAttribute(AppController.SESSION_AREA);
+        }
+        m.addAttribute("hotels", customers.activeHotels(q, city, area));
+        var locations = customers.locations();
+        m.addAttribute("locations", locations);
+        m.addAttribute("cities", locations.stream().map(l -> (String) l.get("city")).distinct().toList());
+        m.addAttribute("city", city == null ? "" : city);
+        m.addAttribute("area", area == null ? "" : area);
         m.addAttribute("q", q == null ? "" : q);
         m.addAttribute("section", "hotels");
         return "customer/hotels";
@@ -106,8 +117,10 @@ public class CustomerController {
 
     @GetMapping("/today")
     public String today(Model m) {
-        m.addAttribute("subs", customers.subscriptions(CurrentUser.require().getId(), null).stream()
-                .filter(s -> "ACTIVE".equals(s.getStatus())).toList());
+        var active = customers.subscriptions(CurrentUser.require().getId(), null).stream()
+                .filter(s -> "ACTIVE".equals(s.getStatus())).toList();
+        m.addAttribute("subs", active);
+        m.addAttribute("menuByHotel", menus.todayByHotel(active.stream().map(com.mealtoken.service.CustomerService.SubView::getHotelId).toList()));
         m.addAttribute("section", "today");
         return "customer/today";
     }

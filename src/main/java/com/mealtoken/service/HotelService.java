@@ -60,7 +60,7 @@ public class HotelService {
     @Transactional
     public Hotel createByAdmin(Long adminId, RegistrationForm form) {
         form.setAccountType("OWNER");
-        User owner = registration.register(form, "en");
+        User owner = registration.register(form, "en", true);
         Hotel h = hotels.findByOwnerId(owner.getId()).orElseThrow();
         setStatus(adminId, h.getId(), "ACTIVE");
         return h;
@@ -95,7 +95,7 @@ public class HotelService {
     // ------------------------------------------------------------------ Owner
 
     @Transactional
-    public void updateProfile(HotelContext ctx, String name, String address, String phone, String operatingHours,
+    public void updateProfile(HotelContext ctx, String name, String address, String city, String area, String phone, String operatingHours,
                               String timezone, boolean enforceMealWindow, int lowTokenThreshold) {
         if (!ctx.owner()) throw new BusinessException("error.forbidden");
         if (name == null || name.isBlank() || name.length() > 150) throw new BusinessException("error.hotel.name.required");
@@ -104,6 +104,8 @@ public class HotelService {
         Hotel h = hotels.findById(ctx.hotelId()).orElseThrow();
         h.setName(name.trim());
         h.setAddress(trim(address, 300));
+        h.setCity(trim(city, 80));
+        h.setArea(trim(area, 80));
         h.setPhone(trim(phone, 20));
         h.setOperatingHours(trim(operatingHours, 100));
         h.setTimezone(timezone);

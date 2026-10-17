@@ -44,6 +44,14 @@ app:
   # Leave empty to use the address of the current request.
   public-base-url: ${PUBLIC_BASE_URL:}
   upload-dir: ${UPLOAD_DIR:uploads}
+  # Email / mobile verification at sign-up. Email is sent when MAIL_HOST is set (spring.mail.*);
+  # a mobile code is sent when OTP_SMS_WEBHOOK_URL is set (any SMS / WhatsApp gateway that accepts a JSON webhook).
+  otp:
+    required: ${OTP_REQUIRED:true}
+    sms-webhook-url: ${OTP_SMS_WEBHOOK_URL:}
+    sms-webhook-token: ${OTP_SMS_WEBHOOK_TOKEN:}
+  mail:
+    from: ${MAIL_FROM:no-reply@localhost}
   security:
     # HMAC key for customer pass tokens. MUST be overridden in production (>= 16 chars).
     qr-secret: ${QR_SECRET:dev-only-change-this-secret-before-production}

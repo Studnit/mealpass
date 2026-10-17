@@ -19,9 +19,12 @@ public class PaymentActionController {
 
     @PostMapping("/{area:owner|staff}/payments/{id}/confirm")
     public String confirm(@PathVariable String area, @PathVariable Long id, @RequestParam String method,
-                          @RequestParam(required = false) String reference, RedirectAttributes ra) {
+                          @RequestParam(required = false) String reference,
+                          @RequestParam(required = false) java.math.BigDecimal amount,
+                          @RequestParam(defaultValue = "false") boolean activateNow, RedirectAttributes ra) {
         HotelContext ctx = access.currentActive();
-        payments.confirmManual(ctx, id, method, reference);
+        if (amount == null) payments.confirmManual(ctx, id, method, reference);
+        else payments.confirmManual(ctx, id, method, reference, amount, activateNow);
         ra.addFlashAttribute("ok", "ok.payment.confirmed");
         return "redirect:/" + area + "/table/payments";
     }

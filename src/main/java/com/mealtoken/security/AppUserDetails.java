@@ -15,6 +15,7 @@ public class AppUserDetails implements UserDetails {
     private final String passwordHash;
     private final String language;
     private final boolean active;
+    private final boolean verified;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public AppUserDetails(User u) {
@@ -24,6 +25,7 @@ public class AppUserDetails implements UserDetails {
         this.passwordHash = u.getPasswordHash();
         this.language = u.getPreferredLanguage();
         this.active = "ACTIVE".equals(u.getStatus());
+        this.verified = u.isVerified();
         this.authorities = u.getRoles().stream()
                 .map(r -> new SimpleGrantedAuthority("ROLE_" + r.getName()))
                 .collect(Collectors.toSet());
@@ -38,5 +40,5 @@ public class AppUserDetails implements UserDetails {
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return active; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return active; }
+    @Override public boolean isEnabled() { return verified; }
 }

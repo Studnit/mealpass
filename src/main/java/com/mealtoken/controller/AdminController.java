@@ -35,9 +35,10 @@ public class AdminController {
 
     @PostMapping("/hotels")
     public String createHotel(@RequestParam String hotelName, @RequestParam String fullName, @RequestParam String email,
-                              @RequestParam(required = false) String phone, @RequestParam String password, RedirectAttributes ra) {
+                              @RequestParam(required = false) String phone, @RequestParam String password,
+                              @RequestParam(required = false) String city, @RequestParam(required = false) String area, RedirectAttributes ra) {
         RegistrationForm f = new RegistrationForm();
-        f.setHotelName(hotelName); f.setFullName(fullName); f.setEmail(email); f.setPhone(phone); f.setPassword(password);
+        f.setHotelName(hotelName); f.setFullName(fullName); f.setEmail(email); f.setPhone(phone); f.setPassword(password); f.setCity(city); f.setArea(area);
         hotelService.createByAdmin(CurrentUser.require().getId(), f);
         ra.addFlashAttribute("ok", "ok.saved");
         return "redirect:/admin/hotels";

@@ -33,11 +33,13 @@ public class MenuService {
     private final AuditService audit;
     private final JdbcTemplate jdbc;
     private final Clock clock;
+    private final com.mealtoken.repository.HotelRepository hotels;
 
     public MenuService(MenuItemRepository items, MealSlotRepository slots, NotificationService notifications,
-                       AuditService audit, JdbcTemplate jdbc, Clock clock) {
+                       AuditService audit, JdbcTemplate jdbc, Clock clock,
+                       com.mealtoken.repository.HotelRepository hotels) {
         this.items = items; this.slots = slots; this.notifications = notifications; this.audit = audit;
-        this.jdbc = jdbc; this.clock = clock;
+        this.jdbc = jdbc; this.clock = clock; this.hotels = hotels;
     }
 
     /** Today in the hotel's own time zone. */
@@ -54,6 +56,15 @@ public class MenuService {
             List<MenuItem> mine = all.stream().filter(i -> s.getId().equals(i.getMealSlotId())).toList();
             if (!mine.isEmpty()) out.add(new Group(s.getId(), s.getName(), mine));
         }
+        return out;
+    }
+
+    /** Today's menu (in each hotel's own time zone) for several hotels at once, keyed by hotel id. */
+    @Transactional(readOnly = true)
+    public Map<Long, List<Group>> todayByHotel(Collection<Long> hotelIds) {
+        Map<Long, List<Group>> out = new HashMap<>();
+        for (Long id : new LinkedHashSet<>(hotelIds))
+            hotels.findById(id).ifPresent(h -> out.put(id, groups(id, today(h))));
         return out;
     }
 

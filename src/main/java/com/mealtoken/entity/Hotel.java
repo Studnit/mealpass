@@ -21,6 +21,12 @@ public class Hotel {
     @Column(length = 20)
     private String phone;
 
+    @Column(length = 80)
+    private String city;
+
+    @Column(length = 80)
+    private String area;
+
     @Column(name = "logo_path")
     private String logoPath;
 
@@ -52,6 +58,10 @@ public class Hotel {
     public void setSlug(String v) { this.slug = v; }
     public String getAddress() { return address; }
     public void setAddress(String v) { this.address = v; }
+    public String getCity() { return city; }
+    public void setCity(String v) { this.city = v; }
+    public String getArea() { return area; }
+    public void setArea(String v) { this.area = v; }
     public String getPhone() { return phone; }
     public void setPhone(String v) { this.phone = v; }
     public String getLogoPath() { return logoPath; }

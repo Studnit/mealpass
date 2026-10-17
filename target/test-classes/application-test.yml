@@ -4,6 +4,8 @@ spring:
   jpa:
     show-sql: false
 app:
+  otp:
+    required: false
   public-base-url: http://localhost:8080
   bootstrap:
     admin-email: admin@test.local

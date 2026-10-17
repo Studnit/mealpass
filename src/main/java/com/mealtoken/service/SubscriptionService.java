@@ -85,6 +85,7 @@ public class SubscriptionService {
         s.setRemainingTokens(plan.getTotalTokens());
         s.setStatus("PENDING");
         s.setPaymentStatus("PENDING");
+        s.setTotalAmount(plan.getPrice());          // fixed now: later plan price edits never change what is owed
         s = subs.saveAndFlush(s);
 
         Payment p = new Payment();
@@ -153,6 +154,27 @@ public class SubscriptionService {
                 "expiry=" + s.getExpiryDate());
         notifications.notify(s.getCustomerId(), "SUBSCRIPTION", "notif.sub.activated", hotel.getName(), s.getExpiryDate());
         return s;
+    }
+
+    /** Keeps subscriptions.payment_status in step with the money received: PENDING, PARTIAL or SUCCESS (fully paid). */
+    @Transactional
+    public void syncPaymentStatus(Long subscriptionId) {
+        Subscription s = subs.lockById(subscriptionId).orElseThrow(() -> new BusinessException("error.notfound"));
+        BigDecimal paid = payments.sumPaid(subscriptionId);
+        s.setPaymentStatus(paid.compareTo(s.getTotalAmount()) >= 0 ? "SUCCESS" : paid.signum() > 0 ? "PARTIAL" : "PENDING");
+        subs.save(s);
+    }
+
+    /** A subscription of this hotel, or "not found" (never reveals other hotels' rows). */
+    @Transactional(readOnly = true)
+    public Subscription findForHotel(Long hotelId, Long subscriptionId) {
+        return subs.findById(subscriptionId).filter(x -> x.getHotelId().equals(hotelId))
+                .orElseThrow(() -> new BusinessException("error.notfound"));
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isPending(Long subscriptionId) {
+        return subs.findById(subscriptionId).map(x -> "PENDING".equals(x.getStatus())).orElse(false);
     }
 
     @Transactional

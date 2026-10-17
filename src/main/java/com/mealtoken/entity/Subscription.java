@@ -20,6 +20,7 @@ public class Subscription {
     @Column(name = "remaining_tokens", nullable = false) private int remainingTokens;
     @Column(nullable = false, length = 20) private String status = "PENDING";
     @Column(name = "payment_status", nullable = false, length = 20) private String paymentStatus = "PENDING";
+    @Column(name = "total_amount", nullable = false, precision = 10, scale = 2) private java.math.BigDecimal totalAmount = java.math.BigDecimal.ZERO;
     @Column(name = "created_at", nullable = false, updatable = false) private Instant createdAt = Instant.now();
     @Version private Long version;
 }

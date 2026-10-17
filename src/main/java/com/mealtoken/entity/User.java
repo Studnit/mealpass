@@ -30,6 +30,9 @@ public class User {
     @Column(nullable = false, length = 20)
     private String status = "ACTIVE";
 
+    @Column(name = "verified_at")
+    private Instant verifiedAt;
+
     @Column(name = "failed_logins", nullable = false)
     private int failedLogins = 0;
 
@@ -65,4 +68,8 @@ public class User {
     public void setFailedLogins(int v) { this.failedLogins = v; }
     public Instant getCreatedAt() { return createdAt; }
     public Set<Role> getRoles() { return roles; }
+
+    public Instant getVerifiedAt() { return verifiedAt; }
+    public void setVerifiedAt(Instant v) { this.verifiedAt = v; }
+    public boolean isVerified() { return verifiedAt != null; }
 }

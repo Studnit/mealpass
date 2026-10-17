@@ -6,7 +6,10 @@
       <input class="form-control" th:id="${id} + 'n'" name="planName" required maxlength="100" th:value="${p?.planName}"></div>
     <div class="row g-2">
       <div class="col-6"><label class="form-label" th:for="${id} + 'm'" th:text="#{plan.meals}">Meals per day</label>
-        <input class="form-control" type="number" min="1" max="4" required th:id="${id} + 'm'" name="mealsPerDay" th:value="${p?.mealsPerDay ?: 1}"></div>
+        <select class="form-select" required th:id="${id} + 'm'" name="mealsPerDay">
+          <option value="1" th:selected="${p == null or p.mealsPerDay == 1}" th:text="#{plan.meals.one}">One time (1 meal per day)</option>
+          <option value="2" th:selected="${p != null and p.mealsPerDay == 2}" th:text="#{plan.meals.two}">Two times (2 meals per day)</option>
+        </select></div>
       <div class="col-6"><label class="form-label" th:for="${id} + 't'" th:text="#{plan.tokens}">Tokens</label>
         <input class="form-control" type="number" min="1" max="1000" required th:id="${id} + 't'" name="totalTokens" th:value="${p?.totalTokens ?: 30}"></div>
       <div class="col-6"><label class="form-label" th:for="${id} + 'pr'" th:text="#{plan.price}">Price</label>

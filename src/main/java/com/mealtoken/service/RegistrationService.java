@@ -20,14 +20,21 @@ public class RegistrationService {
     private final RoleRepository roles;
     private final HotelRepository hotels;
     private final PasswordEncoder encoder;
+    private final java.time.Clock clock;
+    private final boolean otpRequired;
 
-    public RegistrationService(UserRepository users, RoleRepository roles,
-                               HotelRepository hotels, PasswordEncoder encoder) {
-        this.users = users; this.roles = roles; this.hotels = hotels; this.encoder = encoder;
+    public RegistrationService(UserRepository users, RoleRepository roles, HotelRepository hotels, PasswordEncoder encoder,
+                               java.time.Clock clock, @org.springframework.beans.factory.annotation.Value("${app.otp.required:true}") boolean otpRequired) {
+        this.users = users; this.roles = roles; this.hotels = hotels; this.encoder = encoder; this.clock = clock; this.otpRequired = otpRequired;
     }
 
+    /** Self-service registration: the account must be verified by a code first when app.otp.required is true. */
     @Transactional
-    public User register(RegistrationForm f, String language) {
+    public User register(RegistrationForm f, String language) { return register(f, language, !otpRequired); }
+
+    /** @param verified true for accounts created by an administrator (no code needed) */
+    @Transactional
+    public User register(RegistrationForm f, String language, boolean verified) {
         if (users.existsByEmailIgnoreCase(f.getEmail()))
             throw new BusinessException("error.email.exists");
         boolean owner = "OWNER".equals(f.getAccountType());
@@ -40,6 +47,7 @@ public class RegistrationService {
         u.setPhone(f.getPhone());
         u.setPasswordHash(encoder.encode(f.getPassword()));
         u.setPreferredLanguage(language);
+        if (verified) u.setVerifiedAt(clock.instant());
         u.getRoles().add(roles.findByName(owner ? "OWNER" : "CUSTOMER").orElseThrow());
         u = users.save(u);
 
@@ -48,11 +56,16 @@ public class RegistrationService {
             h.setName(f.getHotelName().trim());
             h.setSlug(uniqueSlug(f.getHotelName()));
             h.setOwnerId(u.getId());
+            h.setCity(blankToNull(f.getCity()));
+            h.setArea(blankToNull(f.getArea()));
+            h.setPhone(blankToNull(f.getPhone()));
             h.setStatus("PENDING"); // Super Admin must approve before it goes live
             hotels.save(h);
         }
         return u;
     }
+
+    private static String blankToNull(String s) { return s == null || s.isBlank() ? null : s.trim(); }
 
     private String uniqueSlug(String name) {
         String base = Normalizer.normalize(name, Normalizer.Form.NFD)

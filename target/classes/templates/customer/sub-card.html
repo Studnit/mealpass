@@ -20,6 +20,11 @@
       </div>
       <div class="progress mb-3" role="progressbar" th:attr="aria-valuenow=${s.percentUsed},aria-valuemin=0,aria-valuemax=100,aria-label=#{sub.used}">
         <div class="progress-bar bg-warning" th:style="'width:' + ${s.percentUsed} + '%'"></div></div>
+      <div class="bill-strip mb-3" th:if="${s.billed}">
+        <div><small class="text-muted" th:text="#{bill.total}">Total</small><strong th:text="${@fmt.money(s.totalAmount)}">0</strong></div>
+        <div><small class="text-muted" th:text="#{bill.paid}">Paid</small><strong class="text-success" th:text="${@fmt.money(s.paidAmount)}">0</strong></div>
+        <div><small class="text-muted" th:text="#{bill.due}">Remaining</small><strong th:classappend="${s.dueAmount.signum() > 0} ? 'text-danger' : 'text-success'" th:text="${@fmt.money(s.dueAmount)}">0</strong></div>
+      </div>
       <dl class="row small mb-2">
         <dt class="col-5" th:text="#{sub.start}">Start</dt><dd class="col-7" th:text="${@fmt.date(s.start)}">d</dd>
         <dt class="col-5" th:text="#{col.expiry}">Expiry</dt><dd class="col-7"><span th:text="${@fmt.date(s.expiry)}">d</span>
@@ -39,6 +44,22 @@
           <span th:unless="${sl.served}" class="badge text-bg-secondary" th:text="#{redeem.available}">Available</span>
         </li>
       </ul>
+      <th:block th:with="groups=${menuByHotel != null ? menuByHotel[s.hotelId] : null}">
+        <div class="mb-3" th:if="${groups != null and !#lists.isEmpty(groups)}">
+          <h3 class="h6"><i class="bi bi-journal-richtext me-1"></i><span th:text="#{menu.today}">Menu for today</span></h3>
+          <div th:each="g : ${groups}" class="mb-2">
+            <div class="small fw-semibold text-muted" th:text="${g.slotName != null} ? ${g.slotName} : #{menu.allday}">Lunch</div>
+            <ul class="list-unstyled m-0">
+              <li class="d-flex gap-2 align-items-start py-1" th:each="i : ${g.items}">
+                <span class="veg-dot mt-2" th:classappend="${i.veg} ? 'veg' : 'nonveg'"></span>
+                <div class="flex-grow-1"><span th:text="${i.name}" th:classappend="${!i.available} ? 'text-decoration-line-through text-muted'">Dal</span>
+                  <div class="small text-muted" th:if="${i.description != null}" th:text="${i.description}">note</div></div>
+                <span class="badge text-bg-secondary" th:if="${!i.available}" th:text="#{menu.soldout}">Sold out</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </th:block>
     </div>
     <div class="d-grid gap-2">
       <a th:if="${s.redeemable}" class="btn btn-brand" th:href="@{/customer/scan}"><i class="bi bi-qr-code-scan"></i> <span th:text="#{nav.scan}">Scan</span></a>

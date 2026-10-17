@@ -85,6 +85,8 @@
                     <option value="CASH" th:text="#{status.CASH}">Cash</option>
                     <option value="UPI" th:text="#{status.UPI}" th:selected="${row.cells[5].text != ''}">UPI</option>
                   </select>
+                  <input class="form-control form-control-sm" style="width:6rem" type="number" name="amount" step="0.01" min="0.01"
+                         th:max="${row.cells[3].raw}" th:value="${row.cells[3].raw}" required th:attr="aria-label=#{bill.amount}">
                   <input class="form-control form-control-sm" name="reference" maxlength="100" th:value="${row.cells[5].text}"
                          th:placeholder="#{col.reference}" th:attr="aria-label=#{col.reference}">
                   <button class="btn btn-sm btn-success" type="submit" th:text="#{action.confirm}">Confirm</button>
