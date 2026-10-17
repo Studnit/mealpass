@@ -78,8 +78,9 @@
               </form>
             </td>
             <td class="no-print" th:if="${type == 'payments'}">
-              <th:block th:if="${canConfirm and row.cells[7].raw == 'PENDING'}"
-                        th:replace="~{shared/pay-confirm :: form(${row.id}, ${row.cells[3].raw}, ${row.cells[5].text}, 'ACTIVE', ${area})}"></th:block>
+              <th:block th:if="${canConfirm and row.cells[7].raw == 'PENDING'}">
+                <th:block th:replace="~{shared/pay-confirm :: form(${row.id}, ${row.cells[3].raw}, ${row.cells[5].text}, 'ACTIVE', ${area})}"></th:block>
+              </th:block>
             </td>
             <td class="no-print" th:if="${type == 'subscriptions'}">
               <div th:if="${isOwner}" class="d-flex flex-wrap gap-1">
