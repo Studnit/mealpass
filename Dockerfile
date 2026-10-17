@@ -11,6 +11,6 @@ RUN useradd -r -u 1001 app && mkdir -p /app/uploads && chown app /app/uploads
 COPY --from=build /app/target/meal-token-system-*.jar app.jar
 USER app
 ENV UPLOAD_DIR=/app/uploads THYMELEAF_CACHE=true
-VOLUME /app/uploads
+# Persistent uploads: attach a Railway volume in the service settings, mount path /app/uploads.
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java","-XX:MaxRAMPercentage=75","-jar","/app/app.jar"]
