@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/page :: page(#{menu.title}, ${section}, ~{::section})}">
+<body>
+<section>
+  <div class="page-head">
+    <h1 class="h4" th:text="#{menu.title}">Daily menu</h1>
+    <div class="actions">
+      <a class="btn btn-outline-secondary btn-sm" th:classappend="${date == today} ? 'disabled'" th:href="@{/owner/menu(date=${date.minusDays(1)})}"
+         th:attr="aria-label=#{menu.prev}"><i class="bi bi-chevron-left"></i></a>
+      <form method="get" th:action="@{/owner/menu}" class="m-0" data-multi>
+        <input class="form-control form-control-sm" type="date" name="date" th:value="${date}" th:min="${today}" th:max="${maxDate}" onchange="this.form.submit()" th:attr="aria-label=#{menu.date}">
+      </form>
+      <a class="btn btn-outline-secondary btn-sm" th:classappend="${date == maxDate} ? 'disabled'" th:href="@{/owner/menu(date=${date.plusDays(1)})}"
+         th:attr="aria-label=#{menu.next}"><i class="bi bi-chevron-right"></i></a>
+    </div>
+  </div>
+  <p class="text-muted" th:text="#{menu.help}">Add what you are serving. Customers see this menu when they scan your QR code.</p>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-5">
+      <form class="card card-body" method="post" th:action="@{/owner/menu/add}">
+        <h2 class="h6" th:text="#{menu.add.item}">Add a dish</h2>
+        <input type="hidden" name="date" th:value="${date}">
+        <div class="mb-3"><label class="form-label" for="mname" th:text="#{menu.item.name}">Dish</label>
+          <input class="form-control" id="mname" name="name" required maxlength="120" autocomplete="off"></div>
+        <div class="mb-3"><label class="form-label" for="mdesc" th:text="#{menu.item.desc}">Note (optional)</label>
+          <input class="form-control" id="mdesc" name="description" maxlength="300" autocomplete="off"></div>
+        <div class="row g-2 mb-1">
+          <div class="col-7"><label class="form-label" for="mslot" th:text="#{menu.item.slot}">Meal</label>
+            <select class="form-select" id="mslot" name="slotId">
+              <option value="" th:text="#{menu.allday}">Whole day</option>
+              <option th:each="s : ${slots}" th:value="${s.id}" th:text="${s.name}">Lunch</option>
+            </select></div>
+          <div class="col-5"><label class="form-label" for="mveg" th:text="#{menu.item.type}">Type</label>
+            <select class="form-select" id="mveg" name="veg">
+              <option value="true" th:text="#{menu.veg}">Veg</option>
+              <option value="false" th:text="#{menu.nonveg}">Non-veg</option>
+            </select></div>
+        </div>
+        <div class="form-actions"><button class="btn btn-brand" type="submit"><i class="bi bi-plus-lg"></i><span th:text="#{action.add}">Add</span></button></div>
+      </form>
+    </div>
+
+    <div class="col-12 col-lg-7">
+      <div class="card card-body">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+          <h2 class="h6 m-0"><span th:text="${@fmt.date(date)}">date</span></h2>
+          <div class="actions">
+            <form method="post" th:action="@{/owner/menu/copy}" class="m-0" th:if="${date.isAfter(today) or date == today}">
+              <input type="hidden" name="date" th:value="${date}">
+              <button class="btn btn-outline-secondary btn-sm" type="submit"><i class="bi bi-files"></i><span th:text="#{menu.copy}">Copy previous day</span></button>
+            </form>
+            <form method="post" th:action="@{/owner/menu/notify}" class="m-0" th:attr="data-confirm=#{menu.notify.confirm}" th:if="${!#lists.isEmpty(groups)}">
+              <input type="hidden" name="date" th:value="${date}">
+              <button class="btn btn-brand btn-sm" type="submit"><i class="bi bi-bell"></i><span th:text="#{menu.notify}">Notify customers</span></button>
+            </form>
+          </div>
+        </div>
+        <div class="text-center text-muted py-4" th:if="${#lists.isEmpty(groups)}"><i class="bi bi-journal-richtext fs-1 d-block"></i><span th:text="#{menu.empty}">No dishes yet.</span></div>
+        <div th:each="g : ${groups}" class="mb-3">
+          <div class="fw-semibold small text-muted mb-1" th:text="${g.slotName != null} ? ${g.slotName} : #{menu.allday}">Lunch</div>
+          <ul class="list-group">
+            <li class="list-group-item d-flex align-items-center gap-2" th:each="i : ${g.items}">
+              <span class="veg-dot" th:classappend="${i.veg} ? 'veg' : 'nonveg'"></span>
+              <div class="flex-grow-1 min-w-0">
+                <div th:text="${i.name}" th:classappend="${!i.available} ? 'text-decoration-line-through text-muted'">Dal</div>
+                <div class="small text-muted" th:if="${i.description != null}" th:text="${i.description}">note</div>
+              </div>
+              <form method="post" th:action="@{/owner/menu/{id}/toggle(id=${i.id})}" class="m-0">
+                <input type="hidden" name="date" th:value="${date}">
+                <button class="btn btn-sm" th:classappend="${i.available} ? 'btn-outline-secondary' : 'btn-outline-primary'" type="submit"
+                        th:text="${i.available} ? #{menu.mark.soldout} : #{menu.mark.available}">Sold out</button>
+              </form>
+              <form method="post" th:action="@{/owner/menu/{id}/delete(id=${i.id})}" class="m-0" th:attr="data-confirm=#{confirm.menu.delete}">
+                <input type="hidden" name="date" th:value="${date}">
+                <button class="btn btn-sm btn-outline-danger" type="submit" th:attr="aria-label=#{action.deactivate}"><i class="bi bi-trash"></i></button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

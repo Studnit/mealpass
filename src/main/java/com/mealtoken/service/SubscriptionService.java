@@ -59,7 +59,8 @@ public class SubscriptionService {
         r.setPlanId(planId);
         r = requests.save(r);
         String name = users.findById(customerId).map(User::getFullName).orElse("?");
-        notifications.notify(hotel.getOwnerId(), "REQUEST", "notif.req.new", name, plan.getPlanName());
+        notifications.notify(hotel.getOwnerId(), "REQUEST", "notif.req.new", name, plan.getPlanName(), hotel.getName());
+        notifications.notify(customerId, "REQUEST", "notif.req.submitted", hotel.getName(), plan.getPlanName());
         audit.log(customerId, hotelId, "SUBSCRIPTION_REQUESTED", "SubscriptionRequest", r.getId(), "plan=" + plan.getPlanName());
         return r;
     }

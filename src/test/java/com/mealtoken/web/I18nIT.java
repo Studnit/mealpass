@@ -7,10 +7,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.context.MessageSource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Locale;
-import java.util.Properties;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,57 +20,111 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class I18nIT extends AbstractIntegrationTest {
 
-	@Autowired
-	MockMvc mvc;
+    @Autowired
+    MockMvc mvc;
 
-	@Autowired
-	MessageSource messages;
+    @Autowired
+    MessageSource messages;
 
-	@Test
-	void loginPageRendersInEachLanguage() throws Exception {
-		for (String lang : new String[] { "en", "mr", "hi" }) {
-			String html = mvc.perform(get("/login").param("lang", lang)).andExpect(status().isOk()).andReturn()
-					.getResponse().getContentAsString();
+    @Test
+    void loginPageRendersInEachLanguage() throws Exception {
 
-			assertThat(html).doesNotContain("??");
-		}
+        for (String lang : new String[]{"en", "mr", "hi"}) {
 
-		String mr = mvc.perform(get("/login").param("lang", "mr")).andReturn().getResponse().getContentAsString();
+            String html = mvc.perform(
+                    get("/login").param("lang", lang)
+            )
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
-		String en = mvc.perform(get("/login").param("lang", "en")).andReturn().getResponse().getContentAsString();
+            assertThat(html)
+                    .as("Login page should render correctly for language: " + lang)
+                    .doesNotContain("??");
+        }
 
-		assertThat(mr).isNotEqualTo(en).containsPattern("[\\u0900-\\u097F]");
-	}
+        String mr = mvc.perform(
+                get("/login").param("lang", "mr")
+        )
+        .andExpect(status().isOk())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
 
-	@Test
-	void everyEnglishKeyHasMarathiAndHindiTranslations() throws Exception {
+        String en = mvc.perform(
+                get("/login").param("lang", "en")
+        )
+        .andExpect(status().isOk())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
 
-		Properties en = load("messages.properties");
+        assertThat(mr)
+                .as("Marathi and English login pages should differ")
+                .isNotEqualTo(en)
+                .containsPattern("[\\u0900-\\u097F]");
+    }
 
-		for (String file : new String[] { "messages_mr.properties", "messages_hi.properties" }) {
-			Properties other = load(file);
+    @Test
+    void everyEnglishKeyHasMarathiAndHindiTranslations() throws Exception {
 
-			assertThat(other.stringPropertyNames()).as(file).containsAll(en.stringPropertyNames());
-		}
+        Properties en = load("messages.properties");
 
-		String firstKey = en.stringPropertyNames().iterator().next();
+        for (String file : new String[]{
+                "messages_mr.properties",
+                "messages_hi.properties"
+        }) {
 
-		assertThat(messages.getMessage(firstKey, null, Locale.forLanguageTag("mr"))).isNotBlank();
-	}
+            Properties other = load(file);
 
-	private static Properties load(String name) throws Exception {
-		Properties properties = new Properties();
+            assertThat(other.stringPropertyNames())
+                    .as("Missing translations in " + file)
+                    .containsAll(en.stringPropertyNames());
+        }
 
-		var resource = I18nIT.class.getClassLoader().getResourceAsStream(name);
+        // Get a String key instead of an Object.
+        String firstKey = en.stringPropertyNames()
+                .stream()
+                .findFirst()
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "messages.properties contains no keys"
+                        )
+                );
 
-		if (resource == null) {
-			throw new IllegalStateException("Missing message properties file: " + name);
-		}
+        String translatedMessage = messages.getMessage(
+                firstKey,
+                null,
+                Locale.forLanguageTag("mr")
+        );
 
-		try (var reader = new InputStreamReader(resource, StandardCharsets.UTF_8)) {
-			properties.load(reader);
-		}
+        assertThat(translatedMessage).isNotBlank();
+    }
 
-		return properties;
-	}
+    private static Properties load(String name) throws Exception {
+
+        Properties properties = new Properties();
+
+        InputStream resource = I18nIT.class
+                .getClassLoader()
+                .getResourceAsStream(name);
+
+        if (resource == null) {
+            throw new IllegalStateException(
+                    "Properties file not found in classpath: " + name
+            );
+        }
+
+        try (InputStream in = resource;
+             InputStreamReader reader = new InputStreamReader(
+                     in,
+                     StandardCharsets.UTF_8
+             )) {
+
+            properties.load(reader);
+        }
+
+        return properties;
+    }
 }

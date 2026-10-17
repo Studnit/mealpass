@@ -9,6 +9,8 @@
     </div>
   </div>
 
+  <div th:replace="~{customer/menu-card :: card(${menu}, ${suggestedId})}"></div>
+
   <div th:if="${sub == null}" class="card card-body text-center">
     <i class="bi bi-ticket-perforated display-4 text-brand"></i>
     <p class="lead mt-2" th:text="#{error.sub.none}">No active subscription at this hotel.</p>

@@ -149,3 +149,10 @@ a:focus-visible { outline: 3px solid rgba(22,106,70,.5); outline-offset: 2px; bo
   .app-actions .btn-sm { min-height: 36px; }
   #installApp span { display: none; }
 }
+
+/* ===== Daily menu ===== */
+.veg-dot { width: 14px; height: 14px; border: 2px solid #1b8a4b; border-radius: 3px; display: inline-grid; place-items: center; flex-shrink: 0; }
+.veg-dot::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #1b8a4b; }
+.veg-dot.nonveg { border-color: #b3261e; }
+.veg-dot.nonveg::after { background: #b3261e; }
+.min-w-0 { min-width: 0; }

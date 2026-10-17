@@ -12,6 +12,8 @@
   <p><span class="badge text-bg-light border me-1" th:each="s : ${slots}"
            th:text="${s.name} + ' ' + ${#temporals.format(s.startTime, 'HH:mm')} + '–' + ${#temporals.format(s.endTime, 'HH:mm')}">Lunch</span></p>
 
+  <div th:replace="~{customer/menu-card :: card(${menu}, null)}"></div>
+
   <div class="row g-3 mb-4" th:if="${!#lists.isEmpty(mine)}">
     <div class="col-12 col-lg-6" th:each="s : ${mine}" th:if="${s.status == 'ACTIVE' or s.status == 'PENDING'}">
       <div th:replace="~{customer/sub-card :: card(${s}, false)}"></div></div>

@@ -32,6 +32,10 @@
       <button id="installApp" type="button" class="btn btn-brand btn-sm d-none" th:attr="data-ios-hint=#{install.ios}"><i class="bi bi-download"></i> <span th:text="#{install.button}">Install app</span></button>
     </li>
     <li class="nav-item">
+      <button id="soundToggle" type="button" class="btn btn-outline-secondary btn-sm" aria-pressed="true"
+              th:attr="data-on-label=#{sound.on},data-off-label=#{sound.off},aria-label=#{sound.on},title=#{sound.on}"><i class="bi bi-volume-up"></i></button>
+    </li>
+    <li class="nav-item">
       <a class="btn btn-outline-secondary btn-sm position-relative" th:href="@{/notifications}" th:attr="aria-label=#{nav.notifications}">
         <i class="bi bi-bell"></i>
         <span th:if="${unread != null and unread > 0}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
@@ -76,6 +80,7 @@
 <div class="app-shell">
   <aside class="sidebar d-none d-md-block"><nav th:replace="~{fragments/nav :: navlinks(${active})}"></nav></aside>
   <main id="main-content" class="content p-3 p-md-4">
+    <span sec:authorize="hasAnyRole('OWNER','STAFF')" data-owner-alerts hidden></span>
     <div th:if="${ok != null}" class="alert alert-success alert-dismissible fade show" role="status">
       <i class="bi bi-check-circle me-1"></i><span th:text="#{${ok}}">Saved</span>
       <button type="button" class="btn-close" data-bs-dismiss="alert" th:attr="aria-label=#{nav.close}"></button>
@@ -83,6 +88,10 @@
     <div th:if="${err != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
       <i class="bi bi-exclamation-triangle me-1"></i><span th:text="#{${err}}">Error</span>
       <button type="button" class="btn-close" data-bs-dismiss="alert" th:attr="aria-label=#{nav.close}"></button>
+    </div>
+    <div th:if="${speak != null}" id="voiceMsg" class="mb-3" th:attr="data-text=${speak},data-lang=${#locale.language == 'mr' ? 'mr-IN' : (#locale.language == 'hi' ? 'hi-IN' : 'en-IN')}">
+      <button type="button" id="voiceReplay" class="btn btn-outline-secondary btn-sm"><i class="bi bi-volume-up"></i><span th:text="#{voice.play}">Play audio</span></button>
+      <button type="button" id="voiceStop" class="btn btn-outline-secondary btn-sm d-none"><i class="bi bi-stop-circle"></i><span th:text="#{voice.stop}">Stop audio</span></button>
     </div>
     <div class="page-bar" data-page-bar>
       <button type="button" class="btn-back" data-back th:attr="data-fallback=@{/home}" hidden>

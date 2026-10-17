@@ -23,6 +23,13 @@ UI languages: English, Marathi, Hindi.
   (one served attendance per subscription/date/slot, one active subscription per customer+hotel, one active QR per hotel, one reversal per reference),
   and triggers making `token_transactions` and `audit_logs` append-only.
 - **Tenant isolation:** the hotel is derived server-side from the logged-in user, never from request parameters; other hotels' rows return "not found".
+- **Daily menu:** owners add dishes per day (whole day, or tied to Lunch/Dinner; veg/non-veg; mark sold out; copy the previous day; up to 7 days ahead) under *Daily menu*.
+  Customers see today's menu on the hotel page and right after scanning the QR. *Notify customers* sends one notification per active subscriber per day.
+- **Notifications (in-app bell):** customer and owner are both notified when a subscription request is submitted and when a meal scan succeeds;
+  customers also hear about approvals, payments, activation, low tokens, expiry and the daily menu. `ExternalNotificationSender` is the hook for SMS/WhatsApp/email.
+- **Voice announcements** (browser text-to-speech, in English/Marathi/Hindi): after a successful meal scan the customer hears *"<name>, your meal for today is confirmed. Thank you for connecting with <hotel>."*
+  and the hotel owner/staff hear *"<hotel> has received the meal request of <name> successfully."* (the same for subscription requests). Everyone can press *Stop audio* while it plays and switch voice alerts off with the speaker button in the top bar (remembered on that device).
+  Browsers only allow speech after a tap on the page; a *Play audio* button is shown as a fallback. Marathi/Hindi voices must be installed on the device, otherwise the browser reads with an English voice.
 - **Reports** (filter, search, sort, paginate, CSV export with spreadsheet-formula protection), dashboards with charts, notifications, audit logs.
 - **Security:** BCrypt, CSRF on every form, session-fixation protection, login/redemption rate limiting, non-guessable QR identifiers (256-bit random),
   HMAC-signed 5-minute customer passes, signed payment webhooks, secure cookie flags.

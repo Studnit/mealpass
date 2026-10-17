@@ -110,6 +110,8 @@ public class RedemptionService {
         audit.log(c.actorUserId(), hotel.getId(), "MEAL_REDEEMED", "MealAttendance", a.getId(),
                 "mode=" + c.mode() + " ref=" + a.getReferenceNumber() + " slot=" + slot.getCode());
         notifications.notify(c.customerId(), "REDEEMED", "notif.redeem.ok", hotel.getName(), slot.getName(), before - 1);
+        String who = users.findById(c.customerId()).map(com.mealtoken.entity.User::getFullName).orElse("?");
+        notifications.notify(hotel.getOwnerId(), "REDEEMED", "notif.owner.meal", who, slot.getName(), before - 1, hotel.getName());
         if (before - 1 == hotel.getLowTokenThreshold() || before - 1 == 0)
             notifications.notify(c.customerId(), "LOW_TOKENS", "notif.tokens.low", before - 1, hotel.getName());
 

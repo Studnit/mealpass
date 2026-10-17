@@ -40,14 +40,19 @@ public class CustomerController {
     private final UserRepository users;
     private final NotificationService notifications;
     private final RequestRateLimiter limiter;
+    private final com.mealtoken.service.MenuService menus;
+    private final com.mealtoken.notification.VoiceService voice;
 
     public CustomerController(CustomerService customers, HotelRepository hotels, SubscriptionPlanRepository plans,
                               MealSlotRepository slots, SubscriptionService subscriptions, PaymentService payments,
                               QrService qr, RedemptionService redemption, PassTokenService passes, MealMetaService meta,
-                              UserRepository users, NotificationService notifications, RequestRateLimiter limiter) {
+                              UserRepository users, NotificationService notifications, RequestRateLimiter limiter,
+                              com.mealtoken.service.MenuService menus,
+                              com.mealtoken.notification.VoiceService voice) {
         this.customers = customers; this.hotels = hotels; this.plans = plans; this.slots = slots;
         this.subscriptions = subscriptions; this.payments = payments; this.qr = qr; this.redemption = redemption;
         this.passes = passes; this.meta = meta; this.users = users; this.notifications = notifications; this.limiter = limiter;
+        this.menus = menus; this.voice = voice;
     }
 
     // ------------------------------------------------------------------ discovery & subscribing
@@ -68,14 +73,17 @@ public class CustomerController {
         m.addAttribute("plans", plans.findByHotelIdAndActiveTrueOrderByPrice(id));
         m.addAttribute("slots", slots.findByHotelIdAndActiveTrueOrderByStartTime(id));
         m.addAttribute("mine", customers.subscriptions(u.getId(), id));
+        m.addAttribute("menu", menus.groups(id, menus.today(h)));
         m.addAttribute("section", "hotels");
         return "customer/hotel";
     }
 
     @PostMapping("/hotels/{id}/request")
     public String request(@PathVariable Long id, @RequestParam Long planId, RedirectAttributes ra) {
-        subscriptions.request(CurrentUser.require().getId(), id, planId);
+        AppUserDetails u = CurrentUser.require();
+        subscriptions.request(u.getId(), id, planId);
         ra.addFlashAttribute("ok", "ok.requested");
+        hotels.findById(id).ifPresent(h -> ra.addFlashAttribute("speak", voice.say("voice.customer.request", u.getFullName(), h.getName())));
         return "redirect:/customer/subscriptions";
     }
 
@@ -122,7 +130,11 @@ public class CustomerController {
         m.addAttribute("sub", customers.subscriptions(u.getId(), h.getId()).stream()
                 .filter(s -> "ACTIVE".equals(s.getStatus())).findFirst().orElse(null));
         m.addAttribute("plans", plans.findByHotelIdAndActiveTrueOrderByPrice(h.getId()));
-        m.addAttribute("suggested", customers.suggestedSlotCode(h.getTimezone()));
+        String suggested = customers.suggestedSlotCode(h.getTimezone());
+        m.addAttribute("suggested", suggested);
+        m.addAttribute("suggestedId", slots.findByHotelIdAndActiveTrueOrderByStartTime(h.getId()).stream()
+                .filter(s -> s.getCode().equals(suggested)).map(com.mealtoken.entity.MealSlot::getId).findFirst().orElse(null));
+        m.addAttribute("menu", menus.groups(h.getId(), menus.today(h)));
         m.addAttribute("key", UUID.randomUUID().toString()); // idempotency key for this confirmation screen
         m.addAttribute("section", "scan");
         return "customer/redeem";
@@ -138,6 +150,7 @@ public class CustomerController {
             RedemptionResult r = redemption.redeem(new RedeemCommand(u.getId(), h.getId(), slotId, u.getId(),
                     "cust-" + u.getId() + "-" + key, "CUSTOMER_SCAN"));
             ra.addFlashAttribute("ok", r.replay() ? "ok.redeemed.replay" : "ok.redeemed");
+            ra.addFlashAttribute("speak", voice.say("voice.customer.meal", u.getFullName(), h.getName()));
             return "redirect:/customer/receipt/" + r.referenceNumber();
         } catch (BusinessException e) {
             notifications.notifyIndependent(u.getId(), "REJECTED", "notif.redeem.rejected", h.getName(), "~" + e.getMessage());

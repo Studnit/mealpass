@@ -72,3 +72,70 @@
 })();
 
 document.addEventListener('click', function (e) { if (e.target.closest('[data-print]')) window.print(); });
+
+// Spoken announcements (browser text-to-speech). Everyone can stop the audio that is playing and switch voice alerts off
+// (the speaker button in the top bar); the choice is remembered on this device.
+(function () {
+  'use strict';
+  var synth = window.speechSynthesis;
+  var toggle = document.getElementById('soundToggle');
+  var msg = document.getElementById('voiceMsg');
+  if (!synth) { if (toggle) toggle.hidden = true; if (msg) msg.hidden = true; return; }
+
+  function storeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function storeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private mode */ } }
+  var on = storeGet('mt.sound') !== 'off', last = -1, unlocked = false;
+  var replay = document.getElementById('voiceReplay'), stopBtn = document.getElementById('voiceStop');
+
+  function showStop(playing) {
+    if (replay) replay.classList.toggle('d-none', playing);
+    if (stopBtn) stopBtn.classList.toggle('d-none', !playing);
+  }
+  function speak(text, lang) {
+    if (!text) return;
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = lang || 'en-IN'; u.rate = 0.95;
+    u.onstart = function () { showStop(true); };
+    u.onend = u.onerror = function () { if (!synth.speaking && !synth.pending) showStop(false); };
+    synth.speak(u);
+  }
+  function stop() { synth.cancel(); showStop(false); }
+
+  function paint() {
+    if (!toggle) return;
+    toggle.querySelector('i').className = on ? 'bi bi-volume-up' : 'bi bi-volume-mute';
+    var label = toggle.getAttribute(on ? 'data-on-label' : 'data-off-label');
+    toggle.setAttribute('aria-pressed', String(on)); toggle.setAttribute('aria-label', label); toggle.title = label;
+  }
+  paint();
+  function unlock() {                         // browsers only allow speech after a tap on the page
+    if (unlocked) return; unlocked = true;
+    synth.speak(new SpeechSynthesisUtterance(' '));
+  }
+  document.addEventListener('pointerdown', unlock, { once: true });
+  if (toggle) toggle.addEventListener('click', function () {
+    on = !on; storeSet('mt.sound', on ? 'on' : 'off'); paint();
+    if (on) unlock(); else stop();            // turning it off silences whatever is playing right now
+  });
+
+  // 1) message prepared by the server for this page (meal confirmed / request submitted)
+  if (msg) {
+    var say = function () { synth.cancel(); speak(msg.getAttribute('data-text'), msg.getAttribute('data-lang')); };
+    if (replay) replay.addEventListener('click', say);          // an explicit tap always plays, even when alerts are off
+    if (stopBtn) stopBtn.addEventListener('click', stop);
+    if (on) say();                                              // may be blocked until the user taps; the button covers that
+  }
+
+  // 2) live alerts: read new meal scans and requests aloud while the page is open (owner / staff only get items)
+  function poll() {
+    if (!on || document.hidden) return;
+    fetch('/notifications/poll?after=' + last, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d) return;
+        if (last >= 0) d.items.forEach(function (i) { speak(i.text, i.lang); });
+        last = d.latest;
+      }).catch(function () { /* offline: try again next time */ });
+  }
+  if (document.querySelector('[data-owner-alerts]')) { poll(); setInterval(poll, 8000); }
+})();
